@@ -82,6 +82,22 @@ const ROOMS = {
   13: "Feather, Gold and Cloth",
 };
 
+// Why the objects of each room are together (same text as the room table in the documentation)
+const ROOM_NOTES = {
+  1: "Works of ancient states and cultures, from Egypt and Greece to the Nok culture and Anatolia.",
+  2: "Regalia and treasures of rulers: the Mughal and Sikh courts, Dahomey, Mysore.",
+  3: "Objects made for worship: Buddhist sculpture and the ancestral shrines of the Benin court.",
+  4: "Things taken from palaces and royal estates: the Yuanmingyuan and the Inca estate of Machu Picchu.",
+  5: "The work of a royal guild: the casters of the Benin court.",
+  6: "Large-scale stone sculpture from Rapa Nui and Persepolis.",
+  7: "Scientific instruments taken as trophies of war and returned by treaty.",
+  9: "Inscriptions, books and archives: the written record of states, faiths and scholars.",
+  10: "Objects made for temples, palaces and churches, removed from the places they belonged to.",
+  11: "Objects that changed hands again and again as spoils of war.",
+  12: "Two meetings with James Cook's voyages: one a seizure, one a gift.",
+  13: "Materials of power in the Americas: Paracas cloth, Mexica featherwork and Quimbaya gold.",
+};
+
 const pad3 = (n) => String(n).padStart(3, '0');
 
 // ---------- museum floors ----------

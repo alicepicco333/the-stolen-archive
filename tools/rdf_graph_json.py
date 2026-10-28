@@ -1,4 +1,4 @@
-"""Turn each object's RDF/XML file into a graph for the 3D metadata viewer (graph3d.js).
+"""Turn each object's RDF/XML file into a graph for the metadata graph on the object page (graph2d.js).
 
     python tools/rdf_graph_json.py
 
@@ -57,7 +57,7 @@ def build(no, path):
         if isinstance(term, Literal):
             nid = f"lit{i}"
             text = str(term)
-            nodes[nid] = {"id": nid, "label": text if len(text) <= 160 else text[:157] + "…", "kind": "literal", "classes": [], "uri": None}
+            nodes[nid] = {"id": nid, "label": text, "kind": "literal", "classes": [], "uri": None}
         else:
             nid = str(term)
             if nid not in nodes:

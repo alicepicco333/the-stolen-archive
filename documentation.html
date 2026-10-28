@@ -436,11 +436,11 @@ y = (84 - lat) / 142 * 394</code></pre>
   "Table": "Items_JS_HTML/5_Europe_ The_Parthenon_Elgin_Marbles.html"
 }</code></pre>
 <h3>RDF graph</h3>
-<p>Each object has an RDF/XML file in <code>rdf_files_graphs/</code> built on CIDOC CRM (for example E22 human-made object or E24 physical human-made thing, E53 place, P55 has current location), combined with Dublin Core, Wikidata, GeoNames and WGS84 coordinates, plus a small project vocabulary (<em>items-ontology</em>) where no existing term fitted. On the object page the RDF is drawn as a 2D diagram (<code>graph2d.js</code>, from <code>graphs/NN.json</code>, made by <code>tools/rdf_graph_json.py</code>).</p>
+<p>Each object has an RDF/XML file in <code>rdf_files_graphs/</code> built on CIDOC CRM (for example E22 human-made object or E24 physical human-made thing, E53 place, P55 has current location), combined with Dublin Core, Wikidata, GeoNames and WGS84 coordinates, plus a small project vocabulary (<em>items-ontology</em>) where no existing term fitted. On the object page the RDF is drawn as a 2D graph (<code>graph2d.js</code>, from <code>graphs/NN.json</code>, made by <code>tools/rdf_graph_json.py</code>).</p>
 <ul>
-<li>The object is at the top; its statements hang from it in five groups (made, origin, removal, today, described as), with the CIDOC CRM and Dublin Core properties in plain words (P52 is <em>owned by</em>, P45 <em>made of</em>).</li>
-<li>Resources (people, places, events, institutions) have a solid border and show how many statements of their own they have; selecting one opens them underneath. Literal values have a dashed border.</li>
-<li>All statements are also listed as text under the diagram.</li>
+<li>The graph reads from left to right: the object, then its statements in five groups (made, origin, removal, today, described as), then one node per value, with the CIDOC CRM and Dublin Core properties in plain words (P52 is <em>owned by</em>, P45 <em>made of</em>). It is drawn with d3 (tree layout) in SVG.</li>
+<li>A resource (a person, place, event or institution) that has statements of its own shows <em>+N</em>; selecting it opens a further branch, and <em>Open all</em> opens every branch. A long value, such as the description, shows <em>read</em> and opens a note with the full text. Hovering a node lights the path back to the object.</li>
+<li>All statements are also listed as text under the graph.</li>
 </ul>
                     </div>
                 </details>
@@ -478,7 +478,7 @@ y = (84 - lat) / 142 * 394</code></pre>
 <tr><td><code>collection.js</code>, <code>tours.js</code></td><td>Collection and Tours pages.</td></tr>
 <tr><td><code>object-page.js</code>, <code>perspectives.js</code>, <code>llm-content.js</code>, <code>images-vis.js</code>, <code>viewer3d.js</code></td><td>Object page: content, perspectives, generated content, image viewer, 3D viewer.</td></tr>
 <tr><td><code>models/</code></td><td>The open 3D scans (<code>NN.glb</code>), listed with their licences in <code>manifest.json</code>.</td></tr>
-<tr><td><code>graph2d.js</code>, <code>graphs/</code>, <code>tools/rdf_graph_json.py</code></td><td>The metadata diagram, its data for each object and the script that makes it from the RDF files.</td></tr>
+<tr><td><code>graph2d.js</code>, <code>graphs/</code>, <code>tools/rdf_graph_json.py</code></td><td>The metadata graph, its data for each object and the script that makes it from the RDF files.</td></tr>
 <tr><td><code>images/credits.json</code></td><td>Author, licence and source of the Wikimedia Commons photos.</td></tr>
 <tr><td><code>docs.js</code></td><td>This page: collapsible sections and index.</td></tr>
 <tr><td><code>Items_JS_HTML/</code>, <code>rdf_files_graphs/</code>, <code>Items_XML/</code></td><td>Dublin Core tables, RDF files and graph images, draw.io models.</td></tr>
