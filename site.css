@@ -1005,8 +1005,9 @@ html::-webkit-scrollbar-track { background: var(--scroll-track); }
 /* the object's room, under the plan */
 .museum-map-labels path.is-current { fill: var(--signal); }
 /* the other objects on the floor: muted, except those sharing the object's room */
-#floor-markers a { opacity: 0.45; transition: opacity 0.2s ease; }
-#floor-markers a.is-same-room, #floor-markers a:hover, #floor-markers a:focus-visible, #floor-markers a.is-active { opacity: 1; }
+#floor-markers .floor-dot { fill: none; stroke: color-mix(in srgb, var(--fg) 45%, transparent); stroke-width: 2; transition: fill 0.2s ease, stroke 0.2s ease; }
+#floor-markers a.is-same-room .floor-dot { fill: var(--fg); stroke: var(--fg); }
+#floor-markers a:hover .floor-dot, #floor-markers a:focus-visible .floor-dot, #floor-markers a.is-active .floor-dot { fill: var(--signal); stroke: var(--signal); }
 .room-card { margin-top: 1.75rem; }
 .where__col .room-card p { margin: 0; }
 .room-card__no { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--signal) !important; }

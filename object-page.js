@@ -31,13 +31,14 @@ function renderRoom(entry, floor) {
   const label = document.getElementById('museum-floor-label');
   if (label) label.textContent = `Floor ${floor}`;
   document.querySelectorAll('#museum-map [data-room]').forEach((el) => el.classList.toggle('is-current', entry && el.dataset.room === String(entry.room)));
-  // every other object on this floor as a numbered marker; those in the same room stand out
+  // every other object on this floor as a dot (only rooms are numbered on this plan);
+  // those in the same room stand out, and each names its object on hover
   const markers = document.getElementById('floor-markers');
   if (markers) {
     markers.innerHTML = entry ? INVENTORY.filter((o) => o.floor === floor && o.no !== entry.no && o.pin).map((o) => `
       <a href="Object-page.html?no=${o.no}" data-no="${o.no}" class="${o.room === entry.room ? 'is-same-room' : ''}" aria-label="${pad3(o.no)} ${o.title}, room ${o.room}">
         <title>${pad3(o.no)} ${o.title}</title>
-        <g class="floor-marker" transform="translate(${o.pin[0]} ${o.pin[1] + 21})"><circle r="17"/><text dy="5">${o.no}</text></g>
+        <circle class="floor-dot" cx="${o.pin[0]}" cy="${o.pin[1] + 21}" r="9"/>
       </a>`).join('') : '';
   }
   if (!card) return;
