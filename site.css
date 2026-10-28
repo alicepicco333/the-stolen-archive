@@ -1017,6 +1017,9 @@ html::-webkit-scrollbar-track { background: var(--scroll-track); }
 .where__floor { margin: 0 0 1rem !important; padding-bottom: 0.7rem; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted) !important; }
 /* the object's room, under the plan */
 .museum-map-labels path.is-current { fill: var(--signal); }
+/* the other objects on the floor: muted, except those sharing the object's room */
+#floor-markers a { opacity: 0.45; transition: opacity 0.2s ease; }
+#floor-markers a.is-same-room, #floor-markers a:hover, #floor-markers a:focus-visible, #floor-markers a.is-active { opacity: 1; }
 .room-card { margin-top: 1.75rem; }
 .where__col .room-card p { margin: 0; }
 .room-card__no { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--signal) !important; }

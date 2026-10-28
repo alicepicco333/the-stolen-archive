@@ -31,6 +31,15 @@ function renderRoom(entry, floor) {
   const label = document.getElementById('museum-floor-label');
   if (label) label.textContent = `Floor ${floor}`;
   document.querySelectorAll('#museum-map [data-room]').forEach((el) => el.classList.toggle('is-current', entry && el.dataset.room === String(entry.room)));
+  // every other object on this floor as a numbered marker; those in the same room stand out
+  const markers = document.getElementById('floor-markers');
+  if (markers) {
+    markers.innerHTML = entry ? INVENTORY.filter((o) => o.floor === floor && o.no !== entry.no && o.pin).map((o) => `
+      <a href="Object-page.html?no=${o.no}" data-no="${o.no}" class="${o.room === entry.room ? 'is-same-room' : ''}" aria-label="${pad3(o.no)} ${o.title}, room ${o.room}">
+        <title>${pad3(o.no)} ${o.title}</title>
+        <g class="floor-marker" transform="translate(${o.pin[0]} ${o.pin[1] + 21})"><circle r="17"/><text dy="5">${o.no}</text></g>
+      </a>`).join('') : '';
+  }
   if (!card) return;
   if (!entry) { card.innerHTML = ''; return; }
   const others = INVENTORY.filter((o) => o.room === entry.room && o.no !== entry.no);
@@ -45,6 +54,12 @@ function renderRoom(entry, floor) {
         <span class="mono">${pad3(o.no)}</span>
         <span class="room-card__title">${o.title}</span>
       </a></li>`).join('')}</ul>` : '<p class="room-card__also mono">The only object in this room</p>'}`;
+  card.querySelectorAll('.room-card__objects a').forEach((a) => {
+    const no = a.getAttribute('href').split('no=')[1];
+    const mark = (on) => markers?.querySelector(`[data-no="${no}"]`)?.classList.toggle('is-active', on);
+    ['mouseenter', 'focus'].forEach((ev) => a.addEventListener(ev, () => mark(true)));
+    ['mouseleave', 'blur'].forEach((ev) => a.addEventListener(ev, () => mark(false)));
+  });
 }
 
 async function loadTourContent() {
