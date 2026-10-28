@@ -43,9 +43,11 @@
 
   // one row per visible leaf; each column starts after the widest label of the one before
   const ROW = 30;
-  const GAP = 44;
+  const gap = () => (narrow.matches ? 22 : 44);
   const PAD = { top: 28, right: 32, bottom: 28, left: 16 };
-  const sizes = () => (narrow.matches ? { rootW: 132, maxChars: 30 } : { rootW: 200, maxChars: 44 });
+  const sizes = () => (narrow.matches ? { rootW: 96, maxChars: 24, minChars: 16 } : { rootW: 200, maxChars: 44, minChars: 24 });
+  // labels are cut to this many characters; render() lowers it until the graph fits its box
+  let chars = 44;
 
   let byId = {};
   let out = {};
@@ -54,7 +56,7 @@
   let gLinks = null;
   let gNodes = null;
   let note = null;
-  let view = { minX: 0 };
+  let view = { minX: 0, k: 1 };
 
   const name = (id) => byId[id]?.label || id;
 
@@ -103,11 +105,15 @@
   }
 
   function drawNode(d) {
+    // drawn afresh on every render, since the label length can change
     const g = d3.select(this);
+    g.selectAll('*').remove();
+    g.attr('tabindex', null).attr('role', null).attr('aria-haspopup', null).attr('aria-label', null);
     const k = d.data.kind;
-    const { rootW, maxChars } = sizes();
+    const { rootW } = sizes();
+    const maxChars = chars;
     if (k === 'root') {
-      const lines = wrap(d.data.label, narrow.matches ? 14 : 22);
+      const lines = wrap(d.data.label, narrow.matches ? 10 : 22);
       const h = 34 + lines.length * 19;
       g.append('rect').attr('class', 'g2-root-box').attr('x', 0).attr('y', -h / 2).attr('width', rootW).attr('height', h).attr('rx', 6);
       g.append('text').attr('class', 'g2-root-kind').attr('x', 14).attr('y', -h / 2 + 22).text('Object');
@@ -124,10 +130,12 @@
     }
     const branches = (d._children || d.children || []).length;
     const long = d.data.label.length > maxChars;
+    // on phones the property word is left out of the drawing; tapping a value shows it with the full text
+    const tappable = long || narrow.matches;
     g.append('circle').attr('class', 'g2-dot').attr('r', k === 'literal' ? 3.5 : 5);
     if (branches) g.append('circle').attr('class', 'g2-ring').attr('r', 9);
     const text = g.append('text').attr('class', 'g2-label').attr('x', 16).attr('dy', '0.35em');
-    text.append('tspan').attr('class', 'g2-prop').text(`${d.data.prop}  `);
+    if (!narrow.matches) text.append('tspan').attr('class', 'g2-prop').text(`${d.data.prop}  `);
     text.append('tspan').attr('class', 'g2-value').text(short(d.data.label, maxChars));
     if (branches) text.append('tspan').attr('class', 'g2-more').text(`  +${branches}`);
     else if (long) text.append('tspan').attr('class', 'g2-more').text('  read');
@@ -135,9 +143,9 @@
     if (branches) {
       g.attr('tabindex', 0).attr('role', 'button')
         .attr('aria-label', `${d.data.prop} ${d.data.label}: ${branches} more statements`);
-    } else if (long) {
+    } else if (tappable) {
       g.attr('tabindex', 0).attr('role', 'button').attr('aria-haspopup', 'dialog')
-        .attr('aria-label', `${d.data.prop}: read the full text`);
+        .attr('aria-label', `${d.data.prop}: ${long ? 'read the full text' : d.data.label}`);
     }
   }
 
@@ -154,10 +162,20 @@
     const node = gNodes.selectAll('g.g2-node').data(nodes, (d) => d.data.id);
     const enter = node.enter().append('g')
       .attr('class', (d) => `g2-node g2-node--${d.data.kind}`)
-      .style('opacity', 0)
-      .each(drawNode);
-    const cols = [0];
-    nodes.forEach((d) => { cols[d.depth + 1] = Math.max(cols[d.depth + 1] || 0, cols[d.depth] + d.w + GAP); });
+      .style('opacity', 0);
+    const merged = enter.merge(node);
+    // fit the box: shorten the labels step by step; if that is not enough, the SVG scales down
+    const avail = Math.max(280, root.clientWidth - 2);
+    const { maxChars, minChars } = sizes();
+    let cols;
+    let maxRight;
+    for (chars = maxChars; ; chars -= 4) {
+      merged.each(drawNode);
+      cols = [0];
+      nodes.forEach((d) => { cols[d.depth + 1] = Math.max(cols[d.depth + 1] || 0, cols[d.depth] + d.w + gap()); });
+      maxRight = d3.max(nodes, (d) => cols[d.depth] + d.w);
+      if (maxRight + PAD.left + PAD.right <= avail || chars - 4 < minChars) break;
+    }
     nodes.forEach((d) => { d.y = cols[d.depth]; });
     // new nodes grow out of the node that was opened; on first draw they fade in place
     enter.attr('transform', (d) => (from ? `translate(${from.y},${from.x})` : `translate(${d.y},${d.x})`));
@@ -165,16 +183,14 @@
     const pad = narrow.matches ? 34 : 40;
     const minX = d3.min(nodes, (d) => d.x) - pad;
     const maxX = d3.max(nodes, (d) => d.x) + pad;
-    const maxRight = d3.max(nodes, (d) => d.y + d.w);
-    const width = Math.max(root.clientWidth - 2, maxRight + PAD.left + PAD.right);
+    const width = Math.max(avail, maxRight + PAD.left + PAD.right);
     const height = maxX - minX + PAD.top + PAD.bottom;
-    view = { minX: minX - PAD.top };
+    view = { minX: minX - PAD.top, k: avail / width };
     // first draw: take the size at once (a transition from no size starts at the browser's 300 x 150)
     (source ? svg.transition().duration(duration).ease(ease) : svg)
       .attr('width', width).attr('height', height)
       .attr('viewBox', `${-PAD.left} ${minX - PAD.top} ${width} ${height}`);
 
-    const merged = enter.merge(node);
     merged.classed('is-open', (d) => !!d.children && d.depth >= 2)
       .attr('aria-expanded', (d) => (d.depth >= 2 && (d.children || d._children) ? String(!!d.children) : null));
     merged.transition().duration(duration).ease(ease)
@@ -216,7 +232,7 @@
     if (d.depth < 2) return;
     if (d.children) { d._children = d.children; d.children = null; render(d); }
     else if (d._children) { d.children = d._children; d._children = null; render(d); }
-    else if (d.data.label.length > sizes().maxChars) openNote(d);
+    else if (d.data.label.length > chars || narrow.matches) openNote(d);
   }
 
   // the note: the full text of a long value, pinned beside its node
@@ -230,9 +246,10 @@
     note.innerHTML = `<div class="g2-note__head"><p class="mono">${esc(d.data.prop)}</p><button type="button" class="btn btn--small">Close</button></div><p class="g2-note__text">${esc(d.data.label)}</p>`;
     root.appendChild(note);
     // under the node, kept inside the graph's width
-    const left = Math.min(d.y + PAD.left + 12, root.scrollWidth - note.offsetWidth - 12);
+    // svg units to box pixels (the graph may be scaled down to fit)
+    const left = Math.min((d.y + PAD.left) * view.k + 12, root.clientWidth - note.offsetWidth - 12);
     note.style.left = `${Math.max(12, left)}px`;
-    note.style.top = `${d.x - view.minX + 16}px`;
+    note.style.top = `${(d.x - view.minX) * view.k + 16}px`;
     note.querySelector('button').addEventListener('click', () => { closeNote(); trigger?.focus(); });
     note.querySelector('button').focus({ preventScroll: true });
   }

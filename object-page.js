@@ -330,7 +330,6 @@ async function renderGallery(itemData, entry) {
   const offset = model ? 1 : 0;
   const total = photos.length + offset;
   const enlarge = document.getElementById('gallery-enlarge');
-  const bar = document.getElementById('photo-bar');
   let current = 0;
 
   function mark(slide) {
@@ -346,7 +345,8 @@ async function renderGallery(itemData, entry) {
   function show3d() {
     viewer.hidden = false;
     main.hidden = true;
-    bar.hidden = true;
+    enlarge.hidden = true;
+    count.textContent = `3D / ${pad(total)}`;
     mark(0);
     renderCredit(model, true);
     viewerReady.then(() => { if (token === renderGallery.token) window.Viewer3D.show?.(model); });
@@ -355,7 +355,7 @@ async function renderGallery(itemData, entry) {
   function show(i) {
     if (viewer) viewer.hidden = true;
     main.hidden = false;
-    bar.hidden = false;
+    enlarge.hidden = false;
     main.classList.remove('is-shown');
     main.src = photos[i];
     const alt = window.LLMContent?.altFor(itemData, photos[i]);
