@@ -108,15 +108,6 @@ async function loadTourContent() {
             document.getElementById('object-date').textContent = objectDate;
             const itemText = translated?.[complexity]?.[length] || itemData[complexity]?.[length] || 'No text available for this selection.';
             document.getElementById('item-text').textContent = itemText;
-            // say when the text is a translation, and when it is a machine translation
-            const note = document.getElementById('translation-note');
-            if (note) {
-              const ui = window.LLMContent?.ui() || {};
-              const own = translated?.[complexity]?.[length];
-              const machine = own && (translated.machine || []).includes(`${complexity}.${length}`);
-              note.textContent = own ? (machine ? ui.machine : ui.translated) : '';
-              note.hidden = !own;
-            }
             document.title = `${itemData.title} · The Stolen Archive`;
 
             renderLabel(itemData, index, items.length, tourName, length, complexity);

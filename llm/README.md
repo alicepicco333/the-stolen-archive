@@ -27,7 +27,7 @@ Commit `../llm-data.json` with the site. `Object-page.html` loads it through `ll
 
 ## Review before publishing
 
-Everything is a draft. Each entry in `llm-data.json` has `"reviewed": false`, and the page labels that content as AI-generated.
+Everything is a draft. Each entry in `llm-data.json` has `"reviewed": false`.
 - **RDF**: the script checks every Wikidata Q-number the model used against Wikidata and lists them in `qid-check.md`, with each label next to where the draft uses it. Fix any mismatch before merging a draft into `rdf_files_graphs/`.
 - **Deep dives**: check the claims against your sources, especially dates and restitution status.
 - **Geo**: check the coordinates in `objects.geojson` (e.g. on geojson.io).
