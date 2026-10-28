@@ -296,13 +296,13 @@
 <ol>
 <li><strong>Tour bar:</strong> the tour's name and position (“01 / 30”), a switch between the three tours, and previous / next buttons.</li>
 <li><strong>Title:</strong> the inventory number as a large outlined numeral, the object's name, and its date on a separate line.</li>
-<li><strong>3D view and gallery:</strong> when a real 3D scan exists, the object opens with it (see <a href="#three-d">3D view</a>); the first thumbnail, “3D”, returns to it. The other thumbnails show the object's photos (1–4 each), with author and licence under the photo; selecting a photo enlarges it in a zoomable viewer (<code>images-vis.js</code>; Escape closes it).</li>
+<li><strong>3D view and gallery:</strong> when a real 3D scan exists, the object opens with it (see <a href="#three-d">3D view</a>); the first thumbnail, “3D”, returns to it. The other thumbnails show the object's photos (1–4 each), with author and licence under the photo; the arrows beside the counter (or the arrow keys) step through all of them. <em>Enlarge</em>, or a click on the photo, opens a full-screen viewer (<code>images-vis.js</code>) with its own previous and next, wheel zoom and drag; Escape closes it on the photo last shown.</li>
 <li><strong>Museum label:</strong> a column that stays in view, with the inventory number, where the object was taken from, where it is held, its room, the length and complexity controls and, when translations exist, a language menu.</li>
 <li><strong>Text:</strong> the tour's text for the chosen length and complexity.</li>
 <li><strong>Perspectives:</strong> see <a href="#perspectives">Perspectives</a>.</li>
 <li><strong>Go deeper:</strong> history and geography panels, shown only when <code>llm-data.json</code> exists (see <a href="#llm">LLM enrichment</a>).</li>
 <li><strong>Then &amp; now:</strong> the floor plan with the object's pin (on the object's floor; the floor switch shows the other floor), and the world map zoomed to its journey.</li>
-<li><strong>The record:</strong> the RDF metadata as an interactive 3D graph, and the Dublin Core table (see <a href="#metadata">Metadata</a>).</li>
+<li><strong>The record:</strong> the RDF metadata as a diagram, and the Dublin Core table (see <a href="#metadata">Metadata</a>).</li>
 <li><strong>Strip:</strong> 01–30, one button per object in the tour.</li>
 </ol>
 <h3>How it works</h3>
@@ -436,12 +436,11 @@ y = (84 - lat) / 142 * 394</code></pre>
   "Table": "Items_JS_HTML/5_Europe_ The_Parthenon_Elgin_Marbles.html"
 }</code></pre>
 <h3>RDF graph</h3>
-<p>Each object has an RDF/XML file in <code>rdf_files_graphs/</code> built on CIDOC CRM (for example E22 human-made object or E24 physical human-made thing, E53 place, P55 has current location), combined with Dublin Core, Wikidata, GeoNames and WGS84 coordinates, plus a small project vocabulary (<em>items-ontology</em>) where no existing term fitted. On the object page the RDF is shown as an interactive 3D graph (<code>graph3d.js</code>, three.js). <code>tools/rdf_graph_json.py</code> parses each RDF file with rdflib, which also checks that it is valid, folds labels and classes into the nodes, lays the graph out in three dimensions with networkx and writes <code>graphs/NN.json</code>; the browser only draws it.</p>
+<p>Each object has an RDF/XML file in <code>rdf_files_graphs/</code> built on CIDOC CRM (for example E22 human-made object or E24 physical human-made thing, E53 place, P55 has current location), combined with Dublin Core, Wikidata, GeoNames and WGS84 coordinates, plus a small project vocabulary (<em>items-ontology</em>) where no existing term fitted. On the object page the RDF is drawn as a 2D diagram (<code>graph2d.js</code>, from <code>graphs/NN.json</code>, made by <code>tools/rdf_graph_json.py</code>).</p>
 <ul>
-<li>The object is the vermilion node, resources (people, places, events, institutions) are spheres, and literal values are small cubes.</li>
-<li>Navigation works as in the 3D object viewer: drag to rotate, scroll or pinch to zoom, arrow keys and + / − with the keyboard, <em>Reset view</em> to start again, and <em>Labels</em> to show or hide the names.</li>
-<li>Hovering a node shows its name; selecting it brings it to the centre, highlights its statements with the property names, and lists them beside the graph, with links to Wikidata and buttons to move to each neighbour. Escape clears the selection.</li>
-<li>All statements are also listed as text under the graph, for reading and for screen readers. Without WebGL the older PNG image is shown instead (made with <code>tools/rdf_graph.py</code>).</li>
+<li>The object is at the top; its statements hang from it in five groups (made, origin, removal, today, described as), with the CIDOC CRM and Dublin Core properties in plain words (P52 is <em>owned by</em>, P45 <em>made of</em>).</li>
+<li>Resources (people, places, events, institutions) have a solid border and show how many statements of their own they have; selecting one opens them underneath. Literal values have a dashed border.</li>
+<li>All statements are also listed as text under the diagram.</li>
 </ul>
                     </div>
                 </details>
@@ -479,7 +478,7 @@ y = (84 - lat) / 142 * 394</code></pre>
 <tr><td><code>collection.js</code>, <code>tours.js</code></td><td>Collection and Tours pages.</td></tr>
 <tr><td><code>object-page.js</code>, <code>perspectives.js</code>, <code>llm-content.js</code>, <code>images-vis.js</code>, <code>viewer3d.js</code></td><td>Object page: content, perspectives, generated content, image viewer, 3D viewer.</td></tr>
 <tr><td><code>models/</code></td><td>The open 3D scans (<code>NN.glb</code>), listed with their licences in <code>manifest.json</code>.</td></tr>
-<tr><td><code>graph3d.js</code>, <code>graphs/</code>, <code>tools/rdf_graph_json.py</code></td><td>The 3D metadata graph, its data for each object and the script that makes it from the RDF files.</td></tr>
+<tr><td><code>graph2d.js</code>, <code>graphs/</code>, <code>tools/rdf_graph_json.py</code></td><td>The metadata diagram, its data for each object and the script that makes it from the RDF files.</td></tr>
 <tr><td><code>images/credits.json</code></td><td>Author, licence and source of the Wikimedia Commons photos.</td></tr>
 <tr><td><code>docs.js</code></td><td>This page: collapsible sections and index.</td></tr>
 <tr><td><code>Items_JS_HTML/</code>, <code>rdf_files_graphs/</code>, <code>Items_XML/</code></td><td>Dublin Core tables, RDF files and graph images, draw.io models.</td></tr>

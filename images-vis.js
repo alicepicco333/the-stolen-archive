@@ -1,135 +1,91 @@
+// Full-screen photo viewer for the object page. Steps through the same photos as the
+// gallery under the main image (object-page.js sets window.ObjectGallery), with
+// previous/next, arrow keys, wheel zoom and drag. Closing it leaves the gallery on
+// the photo that was last shown.
 
-    const modal       = document.getElementById("imageModal");
-    const expandedImg = document.getElementById("expandedImg");
-    const modalContent = document.querySelector(".modal-content");
-    
-  
-    let scale = 1;
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-    let translateX = 0;
-    let translateY = 0;
-    
+(function lightbox() {
+  const box = document.getElementById('imageModal');
+  const img = document.getElementById('expandedImg');
+  const count = document.getElementById('lightbox-count');
+  const closeButton = document.getElementById('lightbox-close');
+  const steps = box.querySelectorAll('[data-lightbox-step]');
+  let index = 0;
+  let scale = 1;
+  let x = 0;
+  let y = 0;
+  let drag = null;
+  let returnFocus = null;
 
-    function openModal(src) {
-     
-        expandedImg.src = src;
-        
-       
-        scale = 1;
-        translateX = 0;
-        translateY = 0;
-        applyTransform();
-    
-     
-        modal.style.display = "block";
-    }
-    
+  const photos = () => (window.ObjectGallery ? window.ObjectGallery.photos : []);
+  const pad = (n) => String(n).padStart(2, '0');
 
-    function closeModal() {
-        modal.style.display = "none";
-    }
-    
- 
-    function applyTransform() {
-        expandedImg.style.transform = `
-            translate(-50%, -50%)
-            translate(${translateX}px, ${translateY}px)
-            scale(${scale})
-        `;}
-    
- 
-    expandedImg.addEventListener('wheel', (e) => {
-        e.preventDefault(); 
-    
-     
-        scale -= e.deltaY * 0.001;
-        
-       
-        if (scale < 0.2) scale = 0.2;
-        if (scale > 10) scale = 10;
-    
-        applyTransform();
-    });
-    
-   
-    expandedImg.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        isDragging = true;
-   
-        startX = e.clientX - translateX;
-        startY = e.clientY - translateY;
-    });
-    
-  
-    expandedImg.addEventListener('mousemove', (e) => {
-        if (!isDragging) return; 
-        translateX = e.clientX - startX;
-        translateY = e.clientY - startY;
-        applyTransform();
-    });
-    
+  function applyTransform() {
+    img.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${scale})`;
+  }
 
-    expandedImg.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
-    expandedImg.addEventListener('mouseleave', () => {
-        isDragging = false;
-    });
-    
- 
-    window.openModal = openModal;
-    window.closeModal = closeModal;
-
-
-let isTouchDragging = false;
-let touchStartX = 0;
-let touchStartY = 0;
-
-
-expandedImg.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    isTouchDragging = true;
-
-
-    const touch = e.touches[0];
-    touchStartX = touch.clientX - translateX;
-    touchStartY = touch.clientY - translateY;
-
-    modalContent.style.cursor = 'grabbing';
-});
-
-
-expandedImg.addEventListener('touchmove', (e) => {
-    if (!isTouchDragging) return;
-
-    e.preventDefault();
-
-   
-    const touch = e.touches[0];
-    translateX = touch.clientX - touchStartX;
-    translateY = touch.clientY - touchStartY;
-
+  function show(i) {
+    const list = photos();
+    if (!list.length) return;
+    index = (i + list.length) % list.length;
+    img.src = list[index];
+    img.alt = window.ObjectGallery.altFor(index);
+    scale = 1; x = 0; y = 0;
     applyTransform();
-});
+    count.textContent = `${pad(index + 1)} / ${pad(list.length)}`;
+    steps.forEach((b) => { b.hidden = list.length < 2; });
+  }
 
+  function open(i) {
+    returnFocus = document.activeElement;
+    box.hidden = false;
+    document.body.style.overflow = 'hidden';
+    show(i);
+    closeButton.focus();
+  }
 
-expandedImg.addEventListener('touchend', () => {
-    isTouchDragging = false;
-    modalContent.style.cursor = 'grab';
-});
+  function close() {
+    box.hidden = true;
+    document.body.style.overflow = '';
+    window.ObjectGallery?.show(index);
+    returnFocus?.focus?.();
+  }
 
+  steps.forEach((b) => b.addEventListener('click', () => show(index + Number(b.dataset.lightboxStep))));
+  closeButton.addEventListener('click', close);
+  // a click on the dark background, outside the photo and the controls, also closes
+  box.addEventListener('click', (e) => { if (e.target === box || e.target.classList.contains('lightbox__stage')) close(); });
 
-
-document.addEventListener('click', (event) => {
-    if (event.target.matches('img:not(#expandedImg)')) {
-      openModal(event.target.src);
-    }
+  document.addEventListener('keydown', (e) => {
+    if (box.hidden) return;
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowLeft') show(index - 1);
+    else if (e.key === 'ArrowRight') show(index + 1);
   });
 
+  // zoom with the wheel, drag to move a zoomed photo
+  img.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    scale = Math.min(10, Math.max(1, scale - e.deltaY * 0.001));
+    if (scale === 1) { x = 0; y = 0; }
+    applyTransform();
+  }, { passive: false });
+  img.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    drag = { x: e.clientX - x, y: e.clientY - y, startX: e.clientX };
+    img.setPointerCapture(e.pointerId);
+  });
+  img.addEventListener('pointermove', (e) => {
+    if (!drag || scale === 1) return;
+    x = e.clientX - drag.x;
+    y = e.clientY - drag.y;
+    applyTransform();
+  });
+  img.addEventListener('pointerup', (e) => {
+    // a horizontal swipe on an unzoomed photo goes to the next or previous one
+    if (drag && scale === 1 && Math.abs(e.clientX - drag.startX) > 50) show(index + (e.clientX < drag.startX ? 1 : -1));
+    drag = null;
+  });
+  img.addEventListener('pointercancel', () => { drag = null; });
 
-// Escape closes the enlarged image
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.style.display === 'block') closeModal();
-});
+  window.Lightbox = { open };
+})();

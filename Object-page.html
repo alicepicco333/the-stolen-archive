@@ -78,11 +78,16 @@
                     </div>
                     <p class="viewer3d__fallback mono">The 3D view needs WebGL, which this browser does not provide. The photos are below.</p>
                 </div>
-                <img id="tour-image" src="" alt="" onclick="openModal(this.src)">
+                <img id="tour-image" src="" alt="">
                 <figcaption class="object-gallery">
-                    <span class="mono" id="gallery-count">01 / 01</span>
+                    <div class="object-gallery__nav">
+                        <button type="button" class="gallery-step" data-gallery-step="-1" aria-label="Previous">&larr;</button>
+                        <span class="mono" id="gallery-count" aria-live="polite">01 / 01</span>
+                        <button type="button" class="gallery-step" data-gallery-step="1" aria-label="Next">&rarr;</button>
+                    </div>
                     <!-- one button per photo of the object, filled by object-page.js -->
                     <ul class="object-gallery__thumbs" id="gallery-thumbs" aria-label="Photos of this object"></ul>
+                    <button type="button" class="btn btn--small object-gallery__enlarge" id="gallery-enlarge">Enlarge</button>
                 </figcaption>
                 <!-- author and licence of the photo shown, from images/credits.json -->
                 <p class="object-credit mono" id="photo-credit" hidden></p>
@@ -214,6 +219,7 @@
                 </div>
                 <div class="where__col">
                     <h3>In the world</h3>
+                    <p class="where__legend mono" aria-hidden="true"><span><i class="where__key where__key--from"></i>Taken from</span><span><i class="where__key where__key--to"></i>Held today</span></p>
                     <svg id="geo-map" class="geo-map" viewBox="0 0 1000 394" role="img" aria-labelledby="geo-map-title" xmlns="http://www.w3.org/2000/svg">
                         <title id="geo-map-title">World map</title>
                         <!-- land: countries from Natural Earth (world.geo.json), equirectangular, see inventory.js WORLD -->
@@ -238,27 +244,14 @@
                 <h2 class="section-title" id="data-title">The record</h2>
                 <div class="data__graph">
                     <h3>RDF graph</h3>
-                    <!-- the object's RDF as a 3D graph (graph3d.js, graphs/NN.json) -->
-                    <div class="graph3d" id="graph3d">
-                        <div class="graph3d__canvas" tabindex="0" role="img" aria-label="Interactive 3D graph of the object's metadata. Drag to rotate and scroll to zoom; with the keyboard, the arrow keys rotate and plus and minus zoom. The same statements are listed as text below."></div>
-                        <div class="graph3d__bar">
-                            <p class="graph3d__legend mono"><span class="k k--root"></span>Object <span class="k k--res"></span>Resource <span class="k k--lit"></span>Value</p>
-                            <div class="viewer3d__actions">
-                                <button type="button" class="btn btn--small" data-graph="labels" aria-pressed="true">Labels</button>
-                                <button type="button" class="btn btn--small" data-graph="reset">Reset view</button>
-                            </div>
-                        </div>
-                        <div class="graph3d__fallback">
-                            <p class="mono">The 3D graph needs WebGL, which this browser does not provide.</p>
-                            <img id="graph-image_id" src="" alt="RDF graph" onclick="openModal(this.src)">
-                        </div>
-                    </div>
-                    <div class="graph3d__info" id="graph3d-info" aria-live="polite" hidden></div>
+                    <!-- the object's RDF as a 2D diagram (graph2d.js, graphs/NN.json) -->
+                    <p class="graph2d__legend mono"><span class="k k--root"></span>Object <span class="k k--res"></span>Resource, click to open <span class="k k--lit"></span>Value</p>
+                    <div class="graph2d" id="graph2d"></div>
                     <details class="graph3d__list">
-                        <summary>All statements as text (<span id="graph3d-count">0</span>)</summary>
-                        <ol id="graph3d-list"></ol>
+                        <summary>All statements as text (<span id="graph-count">0</span>)</summary>
+                        <ol id="graph-list"></ol>
                     </details>
-                    <p class="graph3d__links">The graph is drawn from <a href="" target="_blank" rel="noopener" id="rdf-text-link">the RDF file</a> (CIDOC CRM, Dublin Core and Wikidata). Select a node to see its statements.</p>
+                    <p class="graph2d__links">The graph is drawn from <a href="" target="_blank" rel="noopener" id="rdf-text-link">the RDF file</a> (CIDOC CRM, Dublin Core and Wikidata).</p>
                 </div>
                 <div class="data__table">
                     <h3>General information</h3>
@@ -274,11 +267,16 @@
         </nav>
 
         <!-- image viewer (images-vis.js) -->
-        <div id="imageModal" class="modal" role="dialog" aria-modal="true" aria-label="Enlarged image">
-            <button class="close" type="button" onclick="closeModal()" aria-label="Close">&times;</button>
-            <div class="modal-content">
+        <div id="imageModal" class="lightbox" role="dialog" aria-modal="true" aria-label="Photos of this object" hidden>
+            <div class="lightbox__bar">
+                <span class="mono lightbox__count" id="lightbox-count"></span>
+                <button type="button" class="btn btn--small lightbox__close" id="lightbox-close">Close <span aria-hidden="true">&#x2715;</span></button>
+            </div>
+            <div class="lightbox__stage">
                 <img id="expandedImg" src="" alt="">
             </div>
+            <button type="button" class="lightbox__step lightbox__step--prev" data-lightbox-step="-1" aria-label="Previous photo">&larr;</button>
+            <button type="button" class="lightbox__step lightbox__step--next" data-lightbox-step="1" aria-label="Next photo">&rarr;</button>
         </div>
     </main>
 
@@ -314,6 +312,7 @@
     <script src="images-vis.js"></script>
     <script src="perspectives.js"></script>
     <script src="llm-content.js"></script>
+    <script src="graph2d.js"></script>
     <script src="object-page.js"></script>
     <script type="importmap">
     { "imports": {
@@ -322,6 +321,5 @@
     } }
     </script>
     <script type="module" src="viewer3d.js"></script>
-    <script type="module" src="graph3d.js"></script>
 </body>
 </html>

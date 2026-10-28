@@ -160,15 +160,8 @@ async function loadTourContent() {
               rdfFileLinkElement.href = itemData.metadata['Rdf-file_link'];
           }
 
-            // the 3D graph (graph3d.js); the PNG is the fallback without WebGL
-            const rdfGraphImageElement = document.getElementById('graph-image_id');
-            if (rdfGraphImageElement && itemData.metadata && itemData.metadata['Rdf-Graph_image']) {
-              rdfGraphImageElement.src = itemData.metadata['Rdf-Graph_image'];
-              rdfGraphImageElement.alt = `Graph for ${itemData.title}`;
-            }
-            const graphNo = objectNo(itemData);
-            if (window.Graph3D) window.Graph3D.show(graphNo);
-            else window.addEventListener('graph3d-ready', () => window.Graph3D.show(graphNo), { once: true });
+            // the metadata diagram (graph2d.js)
+            window.Graph2D?.show(objectNo(itemData));
 
           const TableMetadata = document.getElementById('table-metadata');
             if (TableMetadata && itemData.metadata && itemData.metadata['Table']) {
@@ -302,12 +295,28 @@ async function renderGallery(itemData, entry) {
   await modelsReady;
   const model = entry && models && models[entry.no];
   const token = (renderGallery.token = (renderGallery.token || 0) + 1);
+  // slides: the 3D scan first when there is one, then the photos
+  const offset = model ? 1 : 0;
+  const total = photos.length + offset;
+  const enlarge = document.getElementById('gallery-enlarge');
+  let current = 0;
+
+  function mark(slide) {
+    current = slide;
+    thumbs.querySelectorAll('button').forEach((b, j) => b.setAttribute('aria-pressed', String(j === slide)));
+  }
+
+  function altFor(i) {
+    const alt = window.LLMContent?.altFor(itemData, photos[i]);
+    return alt ? alt.alt : `${title}, photo ${i + 1} of ${photos.length}`;
+  }
 
   function show3d() {
     viewer.hidden = false;
     main.hidden = true;
-    count.textContent = '3D';
-    thumbs.querySelectorAll('button').forEach((b, j) => b.setAttribute('aria-pressed', String(j === 0)));
+    enlarge.hidden = true;
+    count.textContent = `3D · ${pad(total)}`;
+    mark(0);
     renderCredit(model, true);
     viewerReady.then(() => { if (token === renderGallery.token) window.Viewer3D.show?.(model); });
   }
@@ -315,17 +324,38 @@ async function renderGallery(itemData, entry) {
   function show(i) {
     if (viewer) viewer.hidden = true;
     main.hidden = false;
+    enlarge.hidden = false;
     main.classList.remove('is-shown');
     main.src = photos[i];
     const alt = window.LLMContent?.altFor(itemData, photos[i]);
-    main.alt = alt ? alt.alt : `${title}, photo ${i + 1} of ${photos.length}`;
+    main.alt = altFor(i);
     main.title = alt ? alt.long_description : '';
     main.dataset.altSet = alt ? '1' : '';
     main.decode?.().catch(() => {}).finally(() => main.classList.add('is-shown'));
-    count.textContent = `${pad(i + 1)} / ${pad(photos.length)}`;
+    count.textContent = `${pad(i + offset + 1)} / ${pad(total)}`;
     renderCredit(photos[i]);
-    const offset = model ? 1 : 0;
-    thumbs.querySelectorAll('button').forEach((b, j) => b.setAttribute('aria-pressed', String(i + offset === j)));
+    mark(i + offset);
+  }
+
+  function step(direction) {
+    const next = (current + direction + total) % total;
+    if (model && next === 0) show3d();
+    else show(next - offset);
+  }
+
+  // controls bound once per page; they always act on the gallery rendered last
+  window.ObjectGallery = { photos, show, altFor, step, open: () => window.Lightbox?.open(current - offset) };
+  if (!renderGallery.bound) {
+    renderGallery.bound = true;
+    document.querySelectorAll('[data-gallery-step]').forEach((b) => b.addEventListener('click', () => window.ObjectGallery.step(Number(b.dataset.galleryStep))));
+    enlarge.addEventListener('click', () => window.ObjectGallery.open());
+    main.addEventListener('click', () => window.ObjectGallery.open());
+    // arrow keys step through the slides, except inside the 3D view where they rotate the model
+    main.closest('figure').addEventListener('keydown', (e) => {
+      if (e.target.closest('.viewer3d') || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+      e.preventDefault();
+      window.ObjectGallery.step(e.key === 'ArrowLeft' ? -1 : 1);
+    });
   }
 
   thumbs.innerHTML = '';
@@ -354,7 +384,8 @@ async function renderGallery(itemData, entry) {
     li.appendChild(button);
     thumbs.appendChild(li);
   });
-  thumbs.hidden = photos.length + (model ? 1 : 0) < 2;
+  thumbs.hidden = total < 2;
+  document.querySelectorAll('[data-gallery-step]').forEach((b) => { b.hidden = total < 2; });
   if (model && !window.Viewer3D?.unsupported) show3d();
   else show(0);
 }

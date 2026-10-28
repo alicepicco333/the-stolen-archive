@@ -11,12 +11,22 @@ function createAtlasMap(el, { onSelect, bounds = [[-45, -160], [66, 178]] } = {}
   const map = L.map(el, {
     zoomSnap: 0.25,
     minZoom: 1,
-    maxBounds: [[-75, -200], [85, 200]],
+    maxBounds: [[-58, -200], [85, 200]], // nothing is south of Wellington (41°S)
     worldCopyJump: false,
     scrollWheelZoom: false, // don't trap page scrolling; zoom with the buttons or a pinch
+    dragging: false,
     attributionControl: false,
   });
   map.fitBounds(bounds);
+
+  // the whole map fits at the start, so it only needs dragging once zoomed in;
+  // back at the starting zoom it snaps to the full view again
+  let baseZoom = map.getZoom();
+  map.on('zoomend', () => {
+    if (map.getZoom() > baseZoom + 0.01) map.dragging.enable();
+    else { map.dragging.disable(); map.fitBounds(bounds, { animate: false }); }
+  });
+  map.on('resize', () => { if (!map.dragging.enabled()) { map.fitBounds(bounds, { animate: false }); baseZoom = map.getZoom(); } });
 
   let countries = null;
   function styleCountries() {
@@ -33,7 +43,8 @@ function createAtlasMap(el, { onSelect, bounds = [[-45, -160], [66, 178]] } = {}
   fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
     .then((r) => r.json())
     .then((data) => {
-      countries = L.geoJSON(data, { interactive: false }).addTo(map);
+      // Antarctica left out: no object comes from or is held there
+      countries = L.geoJSON(data, { interactive: false, filter: (f) => f.id !== 'ATA' }).addTo(map);
       countries.bringToBack();
       styleCountries();
     })
