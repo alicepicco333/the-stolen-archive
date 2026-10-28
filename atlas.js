@@ -25,7 +25,13 @@
   // museum: one numbered marker per object, at the head of its pin, on its floor
   const plan = document.getElementById('floor-plan');
   const svgNS = 'http://www.w3.org/2000/svg';
-  const showMarkers = (floor) => markers.querySelectorAll('a').forEach((a) => a.toggleAttribute('hidden', a.dataset.floor !== String(floor)));
+  // the markers and the room list beside the plan show only the floor in view
+  const showMarkers = (floor) => {
+    markers.querySelectorAll('a').forEach((a) => a.toggleAttribute('hidden', a.dataset.floor !== String(floor)));
+    rooms.querySelectorAll(':scope > li').forEach((li) => { li.hidden = li.dataset.floor !== String(floor); });
+    const label = document.getElementById('room-list-floor');
+    if (label) label.textContent = `Floor ${floor}`;
+  };
   const showFloor = setupFloors(plan, showMarkers);
   INVENTORY.forEach((o) => {
     const a = document.createElementNS(svgNS, 'a');
@@ -37,18 +43,17 @@
       <circle r="17"/><text dy="5">${o.no}</text></g>`;
     markers.appendChild(a);
   });
-  showFloor(1);
-  showMarkers(1);
 
   // museum: rooms with their objects
   const byRoom = {};
   INVENTORY.forEach((o) => (byRoom[o.room] ??= []).push(o));
   rooms.innerHTML = Object.keys(ROOMS).filter((r) => byRoom[r]).map((r) => `
-    <li${r === '9' ? ' class="room-list__floor"' : ''}>
-      ${r === '1' || r === '9' ? `<p class="room-list__floor-label mono">Floor ${r === '1' ? 1 : 2}</p>` : ''}
+    <li data-floor="${byRoom[r][0].floor}">
       <h3><span class="mono">R${r}</span> ${ROOMS[r]}</h3>
       <ul>${byRoom[r].map((o) => `<li><a href="Object-page.html?no=${o.no}" data-no="${o.no}"><span class="mono">${pad3(o.no)}</span> ${o.title}</a></li>`).join('')}</ul>
     </li>`).join('');
+  showFloor(1);
+  showMarkers(1);
 
   // shared highlight across the list, the room list and both maps
   function highlight(no) {
