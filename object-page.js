@@ -31,6 +31,16 @@ function renderRoom(entry, floor) {
   const label = document.getElementById('museum-floor-label');
   if (label) label.textContent = `Floor ${floor}`;
   document.querySelectorAll('#museum-map [data-room]').forEach((el) => el.classList.toggle('is-current', entry && el.dataset.room === String(entry.room)));
+  // every other object on this floor as a dot (only rooms are numbered on this plan);
+  // those in the same room stand out, and each names its object on hover
+  const markers = document.getElementById('floor-markers');
+  if (markers) {
+    markers.innerHTML = entry ? INVENTORY.filter((o) => o.floor === floor && o.no !== entry.no && o.pin).map((o) => `
+      <a href="Object-page.html?no=${o.no}" data-no="${o.no}" class="${o.room === entry.room ? 'is-same-room' : ''}" aria-label="${pad3(o.no)} ${o.title}, room ${o.room}">
+        <title>${pad3(o.no)} ${o.title}</title>
+        <circle class="floor-dot" cx="${o.pin[0]}" cy="${o.pin[1] + 21}" r="9"/>
+      </a>`).join('') : '';
+  }
   if (!card) return;
   if (!entry) { card.innerHTML = ''; return; }
   const others = INVENTORY.filter((o) => o.room === entry.room && o.no !== entry.no);
@@ -45,6 +55,12 @@ function renderRoom(entry, floor) {
         <span class="mono">${pad3(o.no)}</span>
         <span class="room-card__title">${o.title}</span>
       </a></li>`).join('')}</ul>` : '<p class="room-card__also mono">The only object in this room</p>'}`;
+  card.querySelectorAll('.room-card__objects a').forEach((a) => {
+    const no = a.getAttribute('href').split('no=')[1];
+    const mark = (on) => markers?.querySelector(`[data-no="${no}"]`)?.classList.toggle('is-active', on);
+    ['mouseenter', 'focus'].forEach((ev) => a.addEventListener(ev, () => mark(true)));
+    ['mouseleave', 'blur'].forEach((ev) => a.addEventListener(ev, () => mark(false)));
+  });
 }
 
 async function loadTourContent() {
@@ -315,7 +331,6 @@ async function renderGallery(itemData, entry) {
   const offset = model ? 1 : 0;
   const total = photos.length + offset;
   const enlarge = document.getElementById('gallery-enlarge');
-  const bar = document.getElementById('photo-bar');
   let current = 0;
 
   function mark(slide) {
@@ -331,7 +346,8 @@ async function renderGallery(itemData, entry) {
   function show3d() {
     viewer.hidden = false;
     main.hidden = true;
-    bar.hidden = true;
+    enlarge.hidden = true;
+    count.textContent = `3D / ${pad(total)}`;
     mark(0);
     renderCredit(model, true);
     viewerReady.then(() => { if (token === renderGallery.token) window.Viewer3D.show?.(model); });
@@ -340,7 +356,7 @@ async function renderGallery(itemData, entry) {
   function show(i) {
     if (viewer) viewer.hidden = true;
     main.hidden = false;
-    bar.hidden = false;
+    enlarge.hidden = false;
     main.classList.remove('is-shown');
     main.src = photos[i];
     const alt = window.LLMContent?.altFor(itemData, photos[i]);

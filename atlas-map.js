@@ -9,24 +9,50 @@ function createAtlasMap(el, { onSelect, bounds = [[-45, -160], [66, 178]] } = {}
   if (!el || !window.L) return null;
 
   const map = L.map(el, {
-    zoomSnap: 0.25,
-    minZoom: 1,
+    zoomSnap: 0, // smooth trackpad pinches; the buttons still step by 1
+    zoomDelta: 1,
+    maxZoom: 8,
     maxBounds: [[-58, -200], [85, 200]], // nothing is south of Wellington (41°S)
     worldCopyJump: false,
-    scrollWheelZoom: false, // don't trap page scrolling; zoom with the buttons or a pinch
+    scrollWheelZoom: false, // plain scrolling scrolls the page; pinches are handled below
     dragging: false,
     attributionControl: false,
   });
-  map.fitBounds(bounds);
 
-  // the whole map fits at the start, so it only needs dragging once zoomed in;
-  // back at the starting zoom it snaps to the full view again
-  let baseZoom = map.getZoom();
+  // the whole map fits at the start: that is the furthest out it goes, and it only
+  // needs dragging once zoomed in; back at the starting zoom it snaps to the full view
+  let baseZoom = 0;
+  function fit() {
+    map.setMinZoom(0);
+    map.fitBounds(bounds, { animate: false });
+    baseZoom = map.getZoom();
+    map.setMinZoom(baseZoom);
+  }
+  fit();
   map.on('zoomend', () => {
     if (map.getZoom() > baseZoom + 0.01) map.dragging.enable();
     else { map.dragging.disable(); map.fitBounds(bounds, { animate: false }); }
   });
-  map.on('resize', () => { if (!map.dragging.enabled()) { map.fitBounds(bounds, { animate: false }); baseZoom = map.getZoom(); } });
+  map.on('resize', () => { if (!map.dragging.enabled()) fit(); });
+
+  // trackpad pinch (and ctrl + mouse wheel) zooms around the pointer; browsers report a
+  // pinch as a wheel event with ctrlKey. A two-finger scroll without it scrolls the page.
+  let pinch = 0;
+  let pinchAt = null;
+  let frame = 0;
+  el.addEventListener('wheel', (e) => {
+    if (!e.ctrlKey) return;
+    e.preventDefault();
+    pinch += e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+    pinchAt = map.mouseEventToContainerPoint(e);
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      const zoom = Math.min(map.getMaxZoom(), Math.max(baseZoom, map.getZoom() - pinch * 0.01));
+      pinch = 0;
+      if (Math.abs(zoom - map.getZoom()) > 0.001) map.setZoomAround(pinchAt, zoom, { animate: false });
+    });
+  }, { passive: false });
 
   let countries = null;
   function styleCountries() {

@@ -820,10 +820,7 @@ html::-webkit-scrollbar-track { background: var(--scroll-track); }
 .object-figure #tour-image {
     height: min(72vh, 640px);
     max-height: none;
-    object-fit: contain;
-    background: var(--bg); /* the page's own colour, so the photo sits on the page */
-    border: 1px solid var(--rule);
-    border-radius: 9px;
+    object-fit: contain; /* no frame: the photo sits on the page */
 }
 .object-figure figcaption { margin-top: 0.6rem; color: var(--fg-muted); }
 .object-label {
@@ -872,8 +869,7 @@ html::-webkit-scrollbar-track { background: var(--scroll-track); }
 #tour-image[hidden] { display: none; }
 /* 3D view (viewer3d.js) */
 .viewer3d[hidden] { display: none; }
-.viewer3d { position: relative; border: 1px solid var(--rule); border-radius: 9px; background:
-    radial-gradient(ellipse at 50% 40%, var(--bg-raised), var(--bg) 70%); overflow: hidden; }
+.viewer3d { position: relative; overflow: hidden; }
 .viewer3d__canvas { height: min(72vh, 640px); cursor: grab; touch-action: none; }
 .viewer3d__canvas:active { cursor: grabbing; }
 .viewer3d__canvas canvas { display: block; width: 100% !important; height: 100% !important; }
@@ -904,29 +900,20 @@ html::-webkit-scrollbar-track { background: var(--scroll-track); }
 .object-credit em { display: block; font-style: normal; color: var(--fg); }
 .object-gallery__thumbs { display: flex; gap: 6px; margin-top: 0.75rem; list-style: none; overflow-x: auto; }
 .object-gallery__thumbs[hidden] { display: none; }
-/* the stage holds the 3D view or the photo; previous / next sit on its edges,
-   built from the round .icon-btn of the object bar; the counter and Enlarge mirror the 3D view's bar */
+/* the stage holds the 3D view or the photo; under it, previous / next around the counter,
+   centred, with the round .icon-btn of the object bar; Enlarge at the right end */
 .object-stage { position: relative; }
-.object-stage__step {
-    position: absolute; top: 50%; z-index: 2; translate: 0 -50%;
-    background: color-mix(in srgb, var(--bg) 72%, transparent); color: var(--fg);
-    backdrop-filter: blur(6px);
-}
-.object-stage__step--prev { left: 0.9rem; }
-.object-stage__step--next { right: 0.9rem; }
-.object-stage__step[hidden] { display: none; }
-.object-stage__step:active, .lightbox__step:active { scale: 0.96; }
-.object-stage__bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; padding: 0.75rem; pointer-events: none; }
-.object-stage__bar > * { pointer-events: auto; }
-.object-stage__bar[hidden] { display: none; }
-.object-stage__bar .btn--small { background: color-mix(in srgb, var(--bg) 72%, transparent); }
-.object-stage__bar .btn--small:hover { background: var(--fg); }
-/* keep the 3D view's own controls clear of the arrows */
-.object-stage .viewer3d__bar { padding-inline: 0.75rem; }
+.icon-btn .icon-arrow { width: 20px; height: 20px; display: block; }
+.object-gallery__nav { position: relative; display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1rem; }
+.object-gallery__nav .icon-btn { width: 44px; height: 44px; }
+.object-gallery__nav .icon-btn[hidden], .object-gallery__enlarge[hidden] { display: none; }
+.object-gallery__nav .icon-btn:active { scale: 0.96; }
+.object-gallery__count { min-width: 7ch; margin: 0; text-align: center; font-size: 0.8rem; letter-spacing: 0.06em; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+.object-gallery__enlarge { position: absolute; right: 0; top: 50%; translate: 0 -50%; }
+.object-gallery__thumbs { width: fit-content; max-width: 100%; margin-inline: auto; }
+#tour-image { cursor: zoom-in; }
 @media (max-width: 600px) {
-    .object-stage__step { width: 40px; height: 40px; font-size: 1.05rem; }
-    .object-stage__step--prev { left: 0.5rem; }
-    .object-stage__step--next { right: 0.5rem; }
+    .object-gallery__nav { gap: 0.6rem; }
 }
 .object-gallery__thumbs button {
     display: block;
@@ -1017,6 +1004,10 @@ html::-webkit-scrollbar-track { background: var(--scroll-track); }
 .where__floor { margin: 0 0 1rem !important; padding-bottom: 0.7rem; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted) !important; }
 /* the object's room, under the plan */
 .museum-map-labels path.is-current { fill: var(--signal); }
+/* the other objects on the floor: muted, except those sharing the object's room */
+#floor-markers .floor-dot { fill: none; stroke: color-mix(in srgb, var(--fg) 45%, transparent); stroke-width: 2; transition: fill 0.2s ease, stroke 0.2s ease; }
+#floor-markers a.is-same-room .floor-dot { fill: var(--fg); stroke: var(--fg); }
+#floor-markers a:hover .floor-dot, #floor-markers a:focus-visible .floor-dot, #floor-markers a.is-active .floor-dot { fill: var(--signal); stroke: var(--signal); }
 .room-card { margin-top: 1.75rem; }
 .where__col .room-card p { margin: 0; }
 .room-card__no { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--signal) !important; }
@@ -1075,14 +1066,14 @@ html::-webkit-scrollbar-track { background: var(--scroll-track); }
 /* the graph: an SVG tree drawn at 1 unit = 1px, scrolling sideways when wider than its box */
 .graph2d {
     position: relative;
-    overflow-x: auto; overscroll-behavior-x: contain;
+    overflow: hidden; /* the graph is fitted to the box: labels shorten, then it scales */
     border: 1px solid var(--rule); border-radius: 9px;
     background: radial-gradient(ellipse at 15% 50%, var(--bg-raised), var(--bg) 70%);
     transition: opacity 0.2s ease;
 }
 .graph2d.is-loading { opacity: 0.4; }
 .graph2d > p { padding: 1.5rem; color: var(--fg-muted); }
-.g2-svg { display: block; }
+.g2-svg { display: block; width: 100%; height: auto; }
 .g2-link { fill: none; stroke: color-mix(in srgb, var(--fg) 26%, transparent); stroke-width: 1.25; transition: stroke 0.2s ease, opacity 0.2s ease; }
 .g2-svg.is-tracing .g2-link:not(.is-traced) { opacity: 0.35; }
 .g2-link.is-traced { stroke: var(--signal); stroke-width: 1.75; }
