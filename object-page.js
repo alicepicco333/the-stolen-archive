@@ -21,11 +21,31 @@ function getItemsFromLocalStorage() {
 
 window.getItemsFromLocalStorage = getItemsFromLocalStorage;
 
-// Museum map floors (setupFloors in inventory.js): the pin shows only on its own floor
-const showMuseumFloor = setupFloors(document.getElementById('museum-map'), (floor) => {
-  const pin = document.getElementById('museum-map-pin');
-  if (pin && pin.getAttribute('transform')) pin.toggleAttribute('hidden', pin.dataset.floor !== String(floor));
-});
+// Museum map: only the object's own floor is shown (setupFloors in inventory.js)
+const showMuseumFloor = setupFloors(document.getElementById('museum-map'));
+
+// The object's room under the plan: its name, why its objects are together and the
+// other objects in it; the room number is marked on the plan
+function renderRoom(entry, floor) {
+  const card = document.getElementById('room-card');
+  const label = document.getElementById('museum-floor-label');
+  if (label) label.textContent = `Floor ${floor}`;
+  document.querySelectorAll('#museum-map [data-room]').forEach((el) => el.classList.toggle('is-current', entry && el.dataset.room === String(entry.room)));
+  if (!card) return;
+  if (!entry) { card.innerHTML = ''; return; }
+  const others = INVENTORY.filter((o) => o.room === entry.room && o.no !== entry.no);
+  card.innerHTML = `
+    <p class="room-card__no mono">Room ${entry.room}</p>
+    <h4 class="room-card__name">${ROOMS[entry.room]}</h4>
+    ${ROOM_NOTES[entry.room] ? `<p class="room-card__text">${ROOM_NOTES[entry.room]}</p>` : ''}
+    ${others.length ? `<p class="room-card__also mono">Also in this room</p>
+    <ul class="room-card__objects">${others.map((o) => `
+      <li><a href="Object-page.html?no=${o.no}">
+        <span class="room-card__thumb duotone"><img src="${o.images[0]}" alt="" loading="lazy"></span>
+        <span class="mono">${pad3(o.no)}</span>
+        <span class="room-card__title">${o.title}</span>
+      </a></li>`).join('')}</ul>` : '<p class="room-card__also mono">The only object in this room</p>'}`;
+}
 
 async function loadTourContent() {
     const tourData = localStorage.getItem('tourData');
@@ -132,11 +152,7 @@ async function loadTourContent() {
               museumMapTitle.textContent = `Museum map${itemData.maps && itemData.maps['caption-1'] ? ': ' + itemData.maps['caption-1'] : ''}`;
             }
 
-            const textMuseumMap = document.getElementById('text-museum-map');
-            textMuseumMap.textContent = "";
-            if (textMuseumMap && itemData.maps && itemData.maps['caption-1']) {
-              textMuseumMap.textContent = translated?.['caption-1'] || itemData.maps['caption-1'];
-            }
+            renderRoom(entry, floor);
 
             // The world map is an inline SVG too: pins, arc and zoom come from inventory.js
             renderGeoMap(document.getElementById('geo-map'), entry);
@@ -299,6 +315,7 @@ async function renderGallery(itemData, entry) {
   const offset = model ? 1 : 0;
   const total = photos.length + offset;
   const enlarge = document.getElementById('gallery-enlarge');
+  const bar = document.getElementById('photo-bar');
   let current = 0;
 
   function mark(slide) {
@@ -314,8 +331,7 @@ async function renderGallery(itemData, entry) {
   function show3d() {
     viewer.hidden = false;
     main.hidden = true;
-    enlarge.hidden = true;
-    count.textContent = `3D · ${pad(total)}`;
+    bar.hidden = true;
     mark(0);
     renderCredit(model, true);
     viewerReady.then(() => { if (token === renderGallery.token) window.Viewer3D.show?.(model); });
@@ -324,7 +340,7 @@ async function renderGallery(itemData, entry) {
   function show(i) {
     if (viewer) viewer.hidden = true;
     main.hidden = false;
-    enlarge.hidden = false;
+    bar.hidden = false;
     main.classList.remove('is-shown');
     main.src = photos[i];
     const alt = window.LLMContent?.altFor(itemData, photos[i]);

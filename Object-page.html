@@ -67,28 +67,29 @@
         <section class="object-main grid" aria-label="Object">
             <figure class="object-figure">
                 <!-- 3D scan, shown first when one exists (viewer3d.js, models/manifest.json) -->
-                <div class="viewer3d" id="viewer3d" hidden>
-                    <div class="viewer3d__canvas" tabindex="0" role="img" aria-label="3D model of the object. Drag to rotate and scroll to zoom; with the keyboard, the arrow keys rotate and plus and minus zoom."></div>
-                    <div class="viewer3d__bar">
-                        <p class="viewer3d__note mono" id="viewer3d-note"><span>3D scan</span></p>
-                        <div class="viewer3d__actions">
-                            <button type="button" class="btn btn--small" data-3d="colour" aria-pressed="false" hidden>Colour</button>
-                            <button type="button" class="btn btn--small" data-3d="reset">Reset view</button>
+                <!-- the stage: 3D scan or photo, with previous / next on its edges -->
+                <div class="object-stage">
+                    <div class="viewer3d" id="viewer3d" hidden>
+                        <div class="viewer3d__canvas" tabindex="0" role="img" aria-label="3D model of the object. Drag to rotate and scroll to zoom; with the keyboard, the arrow keys rotate and plus and minus zoom."></div>
+                        <div class="viewer3d__bar">
+                            <p class="viewer3d__note mono" id="viewer3d-note"><span>3D scan</span></p>
+                            <div class="viewer3d__actions">
+                                <button type="button" class="btn btn--small" data-3d="colour" aria-pressed="false" hidden>Colour</button>
+                                <button type="button" class="btn btn--small" data-3d="reset">Reset view</button>
+                            </div>
                         </div>
+                        <p class="viewer3d__fallback mono">The 3D view needs WebGL, which this browser does not provide. The photos are below.</p>
                     </div>
-                    <p class="viewer3d__fallback mono">The 3D view needs WebGL, which this browser does not provide. The photos are below.</p>
+                    <img id="tour-image" src="" alt="">
+                    <button type="button" class="icon-btn object-stage__step object-stage__step--prev" data-gallery-step="-1" aria-label="Previous">&larr;</button>
+                    <button type="button" class="icon-btn object-stage__step object-stage__step--next" data-gallery-step="1" aria-label="Next">&rarr;</button>
+                    <div class="object-stage__bar" id="photo-bar">
+                        <p class="viewer3d__note mono" id="gallery-count" aria-live="polite">01 / 01</p>
+                        <button type="button" class="btn btn--small" id="gallery-enlarge">Enlarge</button>
+                    </div>
                 </div>
-                <img id="tour-image" src="" alt="">
-                <figcaption class="object-gallery">
-                    <div class="object-gallery__nav">
-                        <button type="button" class="gallery-step" data-gallery-step="-1" aria-label="Previous">&larr;</button>
-                        <span class="mono" id="gallery-count" aria-live="polite">01 / 01</span>
-                        <button type="button" class="gallery-step" data-gallery-step="1" aria-label="Next">&rarr;</button>
-                    </div>
-                    <!-- one button per photo of the object, filled by object-page.js -->
-                    <ul class="object-gallery__thumbs" id="gallery-thumbs" aria-label="Photos of this object"></ul>
-                    <button type="button" class="btn btn--small object-gallery__enlarge" id="gallery-enlarge">Enlarge</button>
-                </figcaption>
+                <!-- one button per photo of the object, filled by object-page.js -->
+                <ul class="object-gallery__thumbs" id="gallery-thumbs" aria-label="Photos of this object"></ul>
                 <!-- author and licence of the photo shown, from images/credits.json -->
                 <p class="object-credit mono" id="photo-credit" hidden></p>
             </figure>
@@ -163,11 +164,8 @@
                 <h2 class="section-title" id="where-title">Then &amp; now</h2>
                 <div class="where__col">
                     <h3>In the museum</h3>
-                    <div class="floor-switch tabs" role="tablist" aria-label="Museum floors" data-for="museum-map">
-                        <button type="button" class="tab" role="tab" data-floor="1" aria-selected="true">Floor 1<small>Rooms 1–8</small></button>
-                        <button type="button" class="tab" role="tab" data-floor="2" aria-selected="false" tabindex="-1">Floor 2<small>Rooms 9–13</small></button>
-                    </div>
-                    <svg id="museum-map" class="museum-map" viewBox="60 96 728 518" role="img" aria-labelledby="museum-map-title" xmlns="http://www.w3.org/2000/svg">
+                    <p class="where__floor" id="museum-floor-label">Floor 1</p>
+                    <svg id="museum-map" class="museum-map" viewBox="62.5 115.5 723 478" role="img" aria-labelledby="museum-map-title" xmlns="http://www.w3.org/2000/svg">
                         <title id="museum-map-title">Museum map</title>
                         <!-- floor 1: rooms 1-8 (walls, room numbers, stairs) -->
                         <g class="museum-floor" data-floor="1">
@@ -215,7 +213,8 @@
                         <!-- location pin: object-page.js moves it with maps["museum-pin"] from tour-data.json -->
                         <path id="museum-map-pin" class="museum-map-pin" d="M0 0C-11.598 0 -21 9.327 -21 20.832C-21 25.968 -19.118 30.662 -16.011 34.295L0 53L16.011 34.294C19.118 30.662 21 25.968 21 20.831C21.001 9.327 11.598 0 0 0ZM0 28.682C-4.77 28.682 -8.636 24.846 -8.636 20.115C-8.636 15.383 -4.77 11.548 0 11.548C4.77 11.548 8.637 15.383 8.637 20.115C8.637 24.846 4.77 28.682 0 28.682Z"/>
                     </svg>
-                    <p id="text-museum-map" class="mono"></p>
+                    <!-- the object's room: name, why its objects are together, the others in it (object-page.js) -->
+                    <div class="room-card" id="room-card"></div>
                 </div>
                 <div class="where__col">
                     <h3>In the world</h3>
@@ -231,8 +230,10 @@
                         <text class="geo-map-label geo-map-label--from" dy="24" visibility="hidden"></text>
                         <text class="geo-map-label geo-map-label--to" dy="-16" visibility="hidden"></text>
                     </svg>
-                    <p id="text-geo-map" class="mono"></p>
-                    <ul id="geo-details" class="mono" hidden></ul>
+                    <div class="where__notes">
+                        <p id="text-geo-map" class="mono"></p>
+                        <ul id="geo-details" class="mono" hidden></ul>
+                    </div>
                 </div>
             </div>
         </section>
@@ -245,7 +246,10 @@
                 <div class="data__graph">
                     <h3>RDF graph</h3>
                     <!-- the object's RDF as a 2D diagram (graph2d.js, graphs/NN.json) -->
-                    <p class="graph2d__legend mono"><span class="k k--root"></span>Object <span class="k k--res"></span>Resource, click to open <span class="k k--lit"></span>Value</p>
+                    <div class="graph2d__head">
+                        <p class="graph2d__legend mono"><span class="k k--root"></span>Object <span class="k k--group"></span>Group <span class="k k--res"></span>Resource <span class="k k--lit"></span>Value</p>
+                        <button type="button" class="btn btn--small" id="graph-toggle">Open all</button>
+                    </div>
                     <div class="graph2d" id="graph2d"></div>
                     <details class="graph3d__list">
                         <summary>All statements as text (<span id="graph-count">0</span>)</summary>
@@ -275,8 +279,8 @@
             <div class="lightbox__stage">
                 <img id="expandedImg" src="" alt="">
             </div>
-            <button type="button" class="lightbox__step lightbox__step--prev" data-lightbox-step="-1" aria-label="Previous photo">&larr;</button>
-            <button type="button" class="lightbox__step lightbox__step--next" data-lightbox-step="1" aria-label="Next photo">&rarr;</button>
+            <button type="button" class="icon-btn lightbox__step lightbox__step--prev" data-lightbox-step="-1" aria-label="Previous photo">&larr;</button>
+            <button type="button" class="icon-btn lightbox__step lightbox__step--next" data-lightbox-step="1" aria-label="Next photo">&rarr;</button>
         </div>
     </main>
 
@@ -312,6 +316,7 @@
     <script src="images-vis.js"></script>
     <script src="perspectives.js"></script>
     <script src="llm-content.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <script src="graph2d.js"></script>
     <script src="object-page.js"></script>
     <script type="importmap">

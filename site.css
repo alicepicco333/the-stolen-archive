@@ -103,6 +103,22 @@ a:hover { color: var(--signal); }
 button { font: inherit; color: inherit; }
 ul, ol { margin: 0; padding: 0; }
 
+/* scrollbars: thin, in the theme colours. scrollbar-color covers Firefox and Chrome;
+   the ::-webkit rules cover Safari, where the thumb also turns vermilion on hover. */
+html {
+    --scroll-thumb: color-mix(in srgb, var(--fg) 30%, transparent);
+    --scroll-track: var(--bg);
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+body * { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+html::-webkit-scrollbar-track { background: var(--scroll-track); }
+::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border: 3px solid transparent; border-radius: 10px; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb:active { background-color: var(--signal); }
+::-webkit-scrollbar-corner { background: transparent; }
+
 ::selection { background: var(--signal); color: var(--on-signal); }
 
 :focus-visible {
@@ -805,7 +821,8 @@ ul, ol { margin: 0; padding: 0; }
     height: min(72vh, 640px);
     max-height: none;
     object-fit: contain;
-    background: var(--bg-raised);
+    background: var(--bg); /* the page's own colour, so the photo sits on the page */
+    border: 1px solid var(--rule);
     border-radius: 9px;
 }
 .object-figure figcaption { margin-top: 0.6rem; color: var(--fg-muted); }
@@ -881,28 +898,36 @@ ul, ol { margin: 0; padding: 0; }
     gap: 1rem;
     margin-top: 0.75rem;
 }
-.object-gallery .mono { color: var(--fg-muted); min-width: 7ch; text-align: center; font-size: 0.8rem; }
-.object-gallery__nav { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
-.gallery-step {
-    width: 2.25rem; height: 2.25rem;
-    display: grid; place-items: center;
-    border: 1px solid var(--rule); border-radius: var(--radius);
-    background: transparent; color: var(--fg);
-    font-family: var(--font-mono); cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-.gallery-step:hover, .gallery-step:focus-visible { background: var(--fg); color: var(--bg); }
-.gallery-step[hidden], .object-gallery__enlarge[hidden] { display: none; }
-.object-gallery__enlarge { margin-left: auto; flex-shrink: 0; }
-@media (max-width: 600px) {
-    .object-gallery { flex-wrap: wrap; }
-    .object-gallery__thumbs { order: 3; flex-basis: 100%; }
-}
 .object-credit { margin-top: 0.6rem; font-size: 0.75rem; line-height: 1.5; color: var(--fg-muted); }
 .object-credit[hidden] { display: none; }
 .object-credit a { color: inherit; }
 .object-credit em { display: block; font-style: normal; color: var(--fg); }
-.object-gallery__thumbs { display: flex; gap: 6px; list-style: none; overflow-x: auto; }
+.object-gallery__thumbs { display: flex; gap: 6px; margin-top: 0.75rem; list-style: none; overflow-x: auto; }
+.object-gallery__thumbs[hidden] { display: none; }
+/* the stage holds the 3D view or the photo; previous / next sit on its edges,
+   built from the round .icon-btn of the object bar; the counter and Enlarge mirror the 3D view's bar */
+.object-stage { position: relative; }
+.object-stage__step {
+    position: absolute; top: 50%; z-index: 2; translate: 0 -50%;
+    background: color-mix(in srgb, var(--bg) 72%, transparent); color: var(--fg);
+    backdrop-filter: blur(6px);
+}
+.object-stage__step--prev { left: 0.9rem; }
+.object-stage__step--next { right: 0.9rem; }
+.object-stage__step[hidden] { display: none; }
+.object-stage__step:active, .lightbox__step:active { scale: 0.96; }
+.object-stage__bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; padding: 0.75rem; pointer-events: none; }
+.object-stage__bar > * { pointer-events: auto; }
+.object-stage__bar[hidden] { display: none; }
+.object-stage__bar .btn--small { background: color-mix(in srgb, var(--bg) 72%, transparent); }
+.object-stage__bar .btn--small:hover { background: var(--fg); }
+/* keep the 3D view's own controls clear of the arrows */
+.object-stage .viewer3d__bar { padding-inline: 0.75rem; }
+@media (max-width: 600px) {
+    .object-stage__step { width: 40px; height: 40px; font-size: 1.05rem; }
+    .object-stage__step--prev { left: 0.5rem; }
+    .object-stage__step--next { right: 0.5rem; }
+}
 .object-gallery__thumbs button {
     display: block;
     width: 84px;
@@ -985,10 +1010,26 @@ ul, ol { margin: 0; padding: 0; }
 
 /* then & now */
 /* both columns share the same rows (title, controls, map, notes), so the two maps line up */
-.where__col { grid-column: span 6; display: grid; grid-template-rows: subgrid; grid-row: span 5; row-gap: 0; align-content: start; }
+.where__col { grid-column: span 6; display: grid; grid-template-rows: subgrid; grid-row: span 4; row-gap: 0; align-content: start; }
 .where__col h3 { font-size: var(--step-1); text-transform: uppercase; margin-bottom: 1.25rem; }
 .where__col p { margin-top: 1rem; color: var(--fg-muted); }
-.where__col .floor-switch, .where__legend { align-self: end; }
+.where__col .floor-switch, .where__legend, .where__floor { align-self: end; }
+.where__floor { margin: 0 0 1rem !important; padding-bottom: 0.7rem; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted) !important; }
+/* the object's room, under the plan */
+.museum-map-labels path.is-current { fill: var(--signal); }
+.room-card { margin-top: 1.75rem; }
+.where__col .room-card p { margin: 0; }
+.room-card__no { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--signal) !important; }
+.room-card__name { margin: 0.35rem 0 0.8rem; font-family: var(--font-display); font-size: var(--step-2); line-height: 1; text-transform: uppercase; color: var(--fg); text-wrap: balance; }
+.where__col .room-card__text { max-width: 52ch; font-size: 1rem; line-height: 1.55; color: var(--fg); }
+.where__col .room-card .room-card__also { margin-top: 1.75rem; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted); }
+.room-card__objects { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.9rem; margin-top: 0.7rem; }
+.room-card__objects a { display: grid; gap: 0.3rem; text-decoration: none; color: var(--fg); }
+.room-card__thumb { display: block; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 4px; }
+.room-card__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.room-card__objects .mono { font-size: 0.7rem; color: var(--fg-muted); }
+.room-card__title { font-size: 0.9rem; line-height: 1.3; transition: color 0.2s ease; }
+.room-card__objects a:hover .room-card__title, .room-card__objects a:focus-visible .room-card__title { color: var(--signal); }
 .where__legend { display: flex; gap: 1.5rem; margin: 0 0 1rem !important; padding-bottom: 0.7rem; font-size: 0.75rem; }
 .where__legend span { display: inline-flex; align-items: center; gap: 0.5rem; }
 .where__key { display: inline-block; width: 10px; height: 10px; }
@@ -998,9 +1039,9 @@ ul, ol { margin: 0; padding: 0; }
 #geo-details { list-style: none; margin-top: 0.75rem; color: var(--fg-muted); }
 #geo-details[hidden] { display: none; }
 #geo-details li { padding: 0.4rem 0; border-top: 1px solid var(--rule); }
-.museum-map { display: block; width: 100%; height: auto; aspect-ratio: 728 / 518; border: 1px solid var(--rule); border-radius: 9px; background: var(--bg); }
-/* same proportions as the floor plan beside it (viewBox 728 x 518) */
-.geo-map { display: block; width: 100%; height: auto; aspect-ratio: 728 / 518; border: 1px solid var(--rule); border-radius: 9px; background: var(--bg); }
+.museum-map { display: block; width: 100%; height: auto; aspect-ratio: 723 / 478; overflow: visible; }
+/* same proportions as the floor plan beside it, cropped to its outer wall (viewBox 723 x 478) */
+.geo-map { display: block; width: 100%; height: auto; aspect-ratio: 723 / 478; border: 1px solid var(--rule); border-radius: 9px; background: var(--bg); }
 .geo-map-land { fill: var(--fg); fill-opacity: 0.22; stroke: var(--fg); stroke-opacity: 0.55; stroke-width: 0.6; vector-effect: non-scaling-stroke; }
 .geo-map-arc { fill: none; stroke: var(--signal); stroke-width: 2; stroke-dasharray: 6 6; vector-effect: non-scaling-stroke; animation: arc-flow 40s linear infinite; }
 .geo-map-from circle { fill: var(--fg); stroke: var(--bg); stroke-width: 3; }
@@ -1022,53 +1063,61 @@ ul, ol { margin: 0; padding: 0; }
 }
 
 /* metadata */
-.data__graph { grid-column: 1 / span 7; }
+.data__graph { grid-column: 1 / -1; }
 .data__graph img { width: 100%; background: #fff; border: 1px solid var(--rule); cursor: zoom-in; }
 /* 2D metadata diagram (graph2d.js): object -> groups -> values -> their own statements */
-.graph2d__legend { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; margin: 0 0 0.75rem; font-size: 0.75rem; color: var(--fg-muted); }
-.graph2d__legend .k { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--fg); margin-left: 0.6rem; }
-.graph2d__legend .k--root { background: var(--signal); margin-left: 0; }
-.graph2d__legend .k--lit { border-radius: 1px; background: transparent; border: 1px dashed var(--fg-muted); }
+.graph2d__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.75rem; }
+.graph2d__legend { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; margin: 0; font-size: 0.75rem; color: var(--fg-muted); }
+.graph2d__legend .k { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--fg); margin-left: 0.7rem; }
+.graph2d__legend .k--root { background: var(--signal); margin-left: 0; border-radius: 2px; }
+.graph2d__legend .k--group { border-radius: 1.5px; background: var(--bg); border: 1.5px solid var(--fg); }
+.graph2d__legend .k--lit { width: 7px; height: 7px; background: transparent; border: 1.5px solid var(--fg-muted); }
+/* the graph: an SVG tree drawn at 1 unit = 1px, scrolling sideways when wider than its box */
 .graph2d {
-    padding: clamp(1rem, 2.5vw, 1.75rem);
+    position: relative;
+    overflow-x: auto; overscroll-behavior-x: contain;
     border: 1px solid var(--rule); border-radius: 9px;
-    background: color-mix(in srgb, var(--bg-raised) 55%, var(--bg));
+    background: radial-gradient(ellipse at 15% 50%, var(--bg-raised), var(--bg) 70%);
     transition: opacity 0.2s ease;
 }
 .graph2d.is-loading { opacity: 0.4; }
-/* the object on top, a spine running down, one branch per group */
-.g2-root { position: relative; display: inline-block; max-width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--signal); border-radius: 6px; background: var(--bg); line-height: 1.25; }
-.g2-root strong { display: block; font-family: var(--font-display); font-weight: 500; font-size: 1.1rem; color: var(--fg); }
-.g2-root__kind { display: block; margin-bottom: 0.3rem; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--signal); }
-.graph2d .g2-groups { list-style: none; margin: 0 0 0 1.25rem; padding: 0.5rem 0 0; border-left: 1px solid var(--signal); }
-.g2-group { position: relative; display: grid; grid-template-columns: 7rem 1fr; gap: 0.75rem; padding: 0.7rem 0 0.7rem 1.4rem; }
-.g2-group + .g2-group { border-top: 1px solid var(--rule); }
-.g2-group::before { content: ""; position: absolute; left: 0; top: 1.3rem; width: 1rem; border-top: 1px solid var(--signal); }
-/* the spine ends at the last group */
-.g2-group:last-child::after { content: ""; position: absolute; left: -1px; top: calc(1.3rem + 1px); bottom: 0; border-left: 1px solid color-mix(in srgb, var(--bg-raised) 55%, var(--bg)); }
-.g2-group__name { margin: 0.55rem 0 0; font-size: 0.7rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); }
-.graph2d .g2-values, .graph2d .g2-children { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; font-size: inherit; color: inherit; }
-.g2-children[hidden] { display: none; }
-.g2-branch:has(> button[aria-expanded="true"]) { flex-basis: 100%; }
-.graph2d .g2-children { margin: 0.45rem 0 0.2rem 0.8rem; padding: 0.15rem 0 0.15rem 0.8rem; border-left: 1px dashed var(--rule); }
-.g2-chip {
-    display: inline-flex; flex-direction: column; align-items: flex-start; max-width: 100%;
-    padding: 0.35rem 0.6rem; border: 1px solid color-mix(in srgb, var(--fg) 35%, transparent); border-radius: 6px;
-    background: var(--bg); color: var(--fg); font: inherit; font-size: 0.875rem; line-height: 1.3; text-align: left;
+.graph2d > p { padding: 1.5rem; color: var(--fg-muted); }
+.g2-svg { display: block; }
+.g2-link { fill: none; stroke: color-mix(in srgb, var(--fg) 26%, transparent); stroke-width: 1.25; transition: stroke 0.2s ease, opacity 0.2s ease; }
+.g2-svg.is-tracing .g2-link:not(.is-traced) { opacity: 0.35; }
+.g2-link.is-traced { stroke: var(--signal); stroke-width: 1.75; }
+.g2-root-box { fill: var(--bg); stroke: var(--signal); stroke-width: 1.5; }
+.g2-root-kind { fill: var(--signal); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.g2-root-label { fill: var(--fg); font-family: var(--font-display); font-size: 16px; font-weight: 500; }
+.g2-node--group .g2-dot { fill: var(--bg); stroke: var(--fg); stroke-width: 1.5; }
+.g2-group-label { fill: var(--fg-muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.g2-node--resource .g2-dot { fill: var(--fg); }
+.g2-node--literal .g2-dot { fill: var(--bg); stroke: var(--fg-muted); stroke-width: 1.5; }
+.g2-ring { fill: none; stroke: color-mix(in srgb, var(--fg) 45%, transparent); stroke-width: 1; stroke-dasharray: 2 2.5; transition: stroke 0.2s ease; }
+.g2-label { font-size: 13.5px; }
+/* a halo in the background colour keeps text readable where links pass near it */
+.g2-label, .g2-group-label { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+.g2-prop { fill: var(--fg-muted); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.02em; }
+.g2-value { fill: var(--fg); font-family: var(--font-text); }
+.g2-node--literal .g2-value { fill: color-mix(in srgb, var(--fg) 72%, var(--bg)); }
+.g2-more { fill: var(--signal); font-family: var(--font-mono); font-size: 10.5px; }
+.g2-node[role="button"] { cursor: pointer; outline: none; }
+.g2-node[role="button"]:hover .g2-ring, .g2-node[role="button"]:focus-visible .g2-ring { stroke: var(--signal); stroke-dasharray: none; }
+.g2-node[role="button"]:focus-visible .g2-value { text-decoration: underline; text-decoration-color: var(--signal); }
+.g2-node.is-open .g2-dot { fill: var(--signal); }
+.g2-node.is-open .g2-ring { stroke: var(--signal); stroke-dasharray: none; }
+.g2-node.is-open .g2-more { visibility: hidden; }
+.g2-node.is-traced .g2-dot { fill: var(--signal); }
+.g2-node--group.is-traced .g2-dot { stroke: var(--signal); }
+.g2-note {
+    position: absolute; z-index: 3; width: min(30rem, calc(100% - 24px));
+    padding: 0.9rem 1rem 1rem; border: 1px solid color-mix(in srgb, var(--fg) 30%, transparent); border-radius: 9px;
+    background: var(--bg); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
-.g2-chip__prop { font-size: 0.65rem; letter-spacing: 0.04em; color: var(--fg-muted); }
-.g2-chip__label { overflow-wrap: anywhere; }
-.g2-chip--literal { border-style: dashed; border-color: var(--rule); background: transparent; color: var(--fg-muted); }
-button.g2-chip { cursor: pointer; transition: border-color 0.2s ease; }
-button.g2-chip:hover, button.g2-chip:focus-visible, button.g2-chip[aria-expanded="true"] { border-color: var(--signal); }
-.g2-chip__more { margin-top: 0.15rem; font-size: 0.65rem; color: var(--signal); }
-button.g2-chip[aria-expanded="true"] .g2-chip__more { visibility: hidden; }
+.g2-note__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; }
+.g2-note__head .mono { margin: 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--signal); }
+.g2-note__text { margin: 0; max-height: 18rem; overflow-y: auto; font-size: 0.95rem; line-height: 1.55; color: var(--fg); }
 .graph2d__links { margin-top: 0.75rem; font-size: 0.9rem; color: var(--fg-muted); }
-@media (max-width: 600px) {
-    .g2-group { grid-template-columns: 1fr; gap: 0.3rem; }
-    .g2-group__name { margin-top: 0; }
-    .g2-group::before { top: 1.25rem; }
-}
 /* the old 3D graph styles below are kept for the statement list */
 .graph3d { position: relative; border: 1px solid var(--rule); border-radius: 9px; overflow: hidden;
     background: radial-gradient(ellipse at 50% 45%, var(--bg-raised), var(--bg) 72%); }
@@ -1105,7 +1154,7 @@ button.g2-chip[aria-expanded="true"] .g2-chip__more { visibility: hidden; }
 .graph3d__list li .mono { color: var(--signal); font-size: 0.75rem; margin: 0 0.25rem; }
 .graph3d__links { margin-top: 0.75rem; font-size: 0.9rem; color: var(--fg-muted); }
 .data__graph ol { padding-left: 1.2rem; margin: 1.25rem 0; color: var(--fg-muted); font-size: 1rem; }
-.data__table { grid-column: 8 / span 5; min-width: 0; }
+.data__table { grid-column: 1 / span 8; min-width: 0; margin-top: 3.5rem; }
 .data__table h3, .data__graph h3 { font-size: var(--step-1); text-transform: uppercase; margin-bottom: 1.25rem; }
 .data__table table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.9375rem; }
 .data__table th {
@@ -1175,22 +1224,14 @@ button.g2-chip[aria-expanded="true"] .g2-chip__more { visibility: hidden; }
     transform: translate(-50%, -50%);
     cursor: zoom-in; touch-action: none; user-select: none;
 }
-.lightbox__step {
-    position: absolute; top: 50%; z-index: 2; transform: translateY(-50%);
-    width: 3rem; height: 3rem;
-    display: grid; place-items: center;
-    border: 1px solid rgba(236, 236, 242, 0.35); border-radius: var(--radius);
-    background: rgba(11, 11, 14, 0.6); color: #ECECF2;
-    font-family: var(--font-mono); font-size: 1.1rem; cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-.lightbox__step:hover, .lightbox__step:focus-visible { background: #ECECF2; color: #0B0B0E; border-color: #ECECF2; }
+.lightbox__step { position: absolute; top: 50%; z-index: 2; translate: 0 -50%; border-color: rgba(236, 236, 242, 0.6); color: #ECECF2; background: rgba(11, 11, 14, 0.6); }
+.lightbox__step:hover:not(:disabled), .lightbox__step:focus-visible { background: #ECECF2; color: #0B0B0E; }
 .lightbox__step[hidden] { display: none; }
 .lightbox__step--prev { left: clamp(0.5rem, 2vw, 1.5rem); }
 .lightbox__step--next { right: clamp(0.5rem, 2vw, 1.5rem); }
 @media (max-width: 600px) {
     #expandedImg { max-width: 100vw; max-height: calc(100vh - 10rem); }
-    .lightbox__step { top: auto; bottom: 1.25rem; transform: none; }
+    .lightbox__step { top: auto; bottom: 1.25rem; translate: none; }
 }
 
 /* ---------- 8. Other pages ---------- */
@@ -1359,6 +1400,8 @@ button.g2-chip[aria-expanded="true"] .g2-chip__more { visibility: hidden; }
 .atlas-origin.is-active { background: var(--signal); transform-origin: center; box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal) 35%, transparent); }
 
 .atlas-museum__plan { grid-column: 1 / span 8; }
+/* the plan and the room list share two rows: the floor tabs with the floor heading, then the plan with its rooms */
+.atlas-museum__plan, .room-list-wrap { display: grid; grid-template-rows: subgrid; grid-row: span 2; row-gap: 0; }
 .floor-marker circle { fill: var(--bg); stroke: var(--fg); stroke-width: 2; transition: fill 0.2s ease, stroke 0.2s ease; }
 .floor-marker text { fill: var(--fg); font-family: var(--font-mono); font-size: 15px; text-anchor: middle; pointer-events: none; }
 a.is-active .floor-marker circle, a:hover .floor-marker circle, a:focus-visible .floor-marker circle { fill: var(--signal); stroke: var(--signal); }
@@ -1368,7 +1411,12 @@ a.is-active .floor-marker text, a:hover .floor-marker text, a:focus-visible .flo
 .room-list > li[hidden] { display: none; }
 .room-list > li { padding: 0.9rem 0; border-top: 1px solid var(--rule); }
 .room-list__floor-label { color: var(--signal); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem; }
-.room-list-wrap .room-list__floor-label { margin: 0.2rem 0 0.6rem; }
+.room-list-wrap .room-list__floor-label {
+    display: flex; align-items: flex-end; margin: 0 0 1rem; padding-bottom: 1rem;
+    border-bottom: 1px solid var(--rule);
+    font-size: var(--step-1); font-family: var(--font-display); letter-spacing: 0; text-transform: uppercase; color: var(--fg);
+}
+.room-list > li:first-child { border-top: 0; padding-top: 0; }
 #floor-markers a[hidden] { display: none; }
 .room-list h3 { font-size: 1rem; text-transform: uppercase; margin-bottom: 0.5rem; }
 .room-list h3 .mono { color: var(--signal); margin-right: 0.3rem; }
@@ -1379,6 +1427,7 @@ a.is-active .floor-marker text, a:hover .floor-marker text, a:focus-visible .flo
 @media (max-width: 800px) {
     .atlas-world__map, .atlas-list, .atlas-museum__plan, .room-list-wrap { grid-column: 1 / -1; }
     .atlas-list, .room-list-wrap { margin-top: 2rem; max-height: none; }
+    .atlas-museum__plan, .room-list-wrap { display: block; grid-row: auto; }
 }
 
 /* long-form text (about, documentation) */
