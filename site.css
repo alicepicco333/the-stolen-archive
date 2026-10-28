@@ -103,6 +103,22 @@ a:hover { color: var(--signal); }
 button { font: inherit; color: inherit; }
 ul, ol { margin: 0; padding: 0; }
 
+/* scrollbars: thin, in the theme colours. scrollbar-color covers Firefox and Chrome;
+   the ::-webkit rules cover Safari, where the thumb also turns vermilion on hover. */
+html {
+    --scroll-thumb: color-mix(in srgb, var(--fg) 30%, transparent);
+    --scroll-track: var(--bg);
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+body * { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+html::-webkit-scrollbar-track { background: var(--scroll-track); }
+::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border: 3px solid transparent; border-radius: 10px; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb:active { background-color: var(--signal); }
+::-webkit-scrollbar-corner { background: transparent; }
+
 ::selection { background: var(--signal); color: var(--on-signal); }
 
 :focus-visible {
@@ -1359,6 +1375,9 @@ button.g2-chip[aria-expanded="true"] .g2-chip__more { visibility: hidden; }
 .atlas-origin.is-active { background: var(--signal); transform-origin: center; box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal) 35%, transparent); }
 
 .atlas-museum__plan { grid-column: 1 / span 8; }
+/* the plan and the room list share two rows: the floor tabs with the floor heading, then the plan with its rooms */
+.atlas-museum__plan, .room-list-wrap { display: grid; grid-template-rows: subgrid; grid-row: span 2; row-gap: 0; }
+.atlas-museum .museum-map { border: 0; background: none; } /* the plan's outer wall is its frame */
 .floor-marker circle { fill: var(--bg); stroke: var(--fg); stroke-width: 2; transition: fill 0.2s ease, stroke 0.2s ease; }
 .floor-marker text { fill: var(--fg); font-family: var(--font-mono); font-size: 15px; text-anchor: middle; pointer-events: none; }
 a.is-active .floor-marker circle, a:hover .floor-marker circle, a:focus-visible .floor-marker circle { fill: var(--signal); stroke: var(--signal); }
@@ -1368,7 +1387,12 @@ a.is-active .floor-marker text, a:hover .floor-marker text, a:focus-visible .flo
 .room-list > li[hidden] { display: none; }
 .room-list > li { padding: 0.9rem 0; border-top: 1px solid var(--rule); }
 .room-list__floor-label { color: var(--signal); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem; }
-.room-list-wrap .room-list__floor-label { margin: 0.2rem 0 0.6rem; }
+.room-list-wrap .room-list__floor-label {
+    display: flex; align-items: flex-end; margin: 0 0 1rem; padding-bottom: 1rem;
+    border-bottom: 1px solid var(--rule);
+    font-size: var(--step-1); font-family: var(--font-display); letter-spacing: 0; text-transform: uppercase; color: var(--fg);
+}
+.room-list > li:first-child { border-top: 0; padding-top: 0; }
 #floor-markers a[hidden] { display: none; }
 .room-list h3 { font-size: 1rem; text-transform: uppercase; margin-bottom: 0.5rem; }
 .room-list h3 .mono { color: var(--signal); margin-right: 0.3rem; }
@@ -1379,6 +1403,7 @@ a.is-active .floor-marker text, a:hover .floor-marker text, a:focus-visible .flo
 @media (max-width: 800px) {
     .atlas-world__map, .atlas-list, .atlas-museum__plan, .room-list-wrap { grid-column: 1 / -1; }
     .atlas-list, .room-list-wrap { margin-top: 2rem; max-height: none; }
+    .atlas-museum__plan, .room-list-wrap { display: block; grid-row: auto; }
 }
 
 /* long-form text (about, documentation) */
