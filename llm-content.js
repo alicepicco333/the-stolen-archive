@@ -4,10 +4,10 @@
 // be rebuilt with llm/enrich.mjs. If it is missing, the page just works as before.
 
 const LLM_UI = {
-  en: { name: 'English', deeper: 'Go deeper', history: 'History', geography: 'Geography', note: 'Drafted with AI, not yet reviewed by the project team.', then: 'Then', now: 'Now', removed: 'Removed', translated: '', machine: '' },
-  it: { name: 'Italiano', deeper: 'Approfondisci', history: 'Storia', geography: 'Geografia', note: 'Bozza scritta con l\'IA, non ancora revisionata dal team del progetto.', then: 'Allora', now: 'Oggi', removed: 'Rimosso', translated: 'Traduzione scritta con l\'IA, non ancora revisionata.', machine: 'Traduzione automatica (opus-mt), non revisionata: può contenere errori.' },
-  fr: { name: 'Français', deeper: 'Aller plus loin', history: 'Histoire', geography: 'Géographie', note: 'Brouillon rédigé avec l\'IA, pas encore relu par l\'équipe du projet.', then: 'Hier', now: 'Aujourd\'hui', removed: 'Retiré', translated: 'Traduction rédigée avec l\'IA, pas encore relue.', machine: 'Traduction automatique (opus-mt), non relue : elle peut contenir des erreurs.' },
-  es: { name: 'Español', deeper: 'Profundizar', history: 'Historia', geography: 'Geografía', note: 'Borrador redactado con IA, aún no revisado por el equipo del proyecto.', then: 'Antes', now: 'Hoy', removed: 'Retirado', translated: 'Traducción redactada con IA, aún no revisada.', machine: 'Traducción automática (opus-mt), no revisada: puede contener errores.' },
+  en: { name: 'English', deeper: 'Go deeper', history: 'History', geography: 'Geography', then: 'Then', now: 'Now', removed: 'Removed' },
+  it: { name: 'Italiano', deeper: 'Approfondisci', history: 'Storia', geography: 'Geografia', then: 'Allora', now: 'Oggi', removed: 'Rimosso' },
+  fr: { name: 'Français', deeper: 'Aller plus loin', history: 'Histoire', geography: 'Géographie', then: 'Hier', now: 'Aujourd\'hui', removed: 'Retiré' },
+  es: { name: 'Español', deeper: 'Profundizar', history: 'Historia', geography: 'Geografía', then: 'Antes', now: 'Hoy', removed: 'Retirado' },
 };
 
 const LLMContent = {
@@ -121,7 +121,6 @@ const LLMContent = {
     const ui = this.ui();
     if (!available.includes(this.activeTab)) this.activeTab = available[0];
     section.querySelector('h2').textContent = ui.deeper;
-    section.querySelector('.ai-note').textContent = ui.note;
 
     const tabBar = section.querySelector('.deepdive-tabs');
     tabBar.innerHTML = '';
