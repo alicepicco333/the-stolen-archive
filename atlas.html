@@ -18,7 +18,7 @@
     <!-- HEADER: same on every page, set aria-current on the current link -->
     <header class="site-header">
         <div class="site-header__inner grid">
-            <a class="wordmark" href="index.html"><img class="wordmark__icon" src="images/favicon.svg" alt="" width="32" height="32"><span class="wordmark__text">The Stolen<br>Archive<span>.</span></span></a>
+            <a class="wordmark" href="index.html" aria-label="The Stolen Archive, home"><img class="wordmark__icon" src="images/favicon.svg" alt="" width="32" height="32"></a>
             <nav class="site-nav" aria-label="Main">
                 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">Menu</button>
                 <ul class="site-nav__links" id="nav-links">
@@ -76,6 +76,7 @@
                     <button type="button" class="tab" role="tab" data-floor="1" aria-selected="true">Floor 1<small>Rooms 1–8</small></button>
                     <button type="button" class="tab" role="tab" data-floor="2" aria-selected="false" tabindex="-1">Floor 2<small>Rooms 9–13</small></button>
                 </div>
+                <div class="floor-plan-wrap">
                 <svg id="floor-plan" class="museum-map" viewBox="62.5 115.5 723 478" role="img" aria-labelledby="floor-plan-title" xmlns="http://www.w3.org/2000/svg">
                     <title id="floor-plan-title">Museum floor plans with the thirty objects</title>
                     <!-- floor 1: rooms 1-8 (walls, room numbers, stairs) -->
@@ -101,6 +102,13 @@
                             <path data-room="5" d="M553.464 283.001H550.959C551.384 280.314 551.626 278.294 551.687 275.284L559.969 275.264V277.688H553.747L553.505 280.536C554.191 280.051 555.06 279.769 556.252 279.769C558.817 279.769 560.453 281.667 560.453 284.354C560.453 287.081 558.393 289.202 555.403 289.202C552.919 289.202 550.454 287.263 550.959 284.213H553.181C553.02 286.01 553.989 286.98 555.525 286.98C557.1 286.98 557.949 285.788 557.949 284.374C557.949 282.96 557.262 281.647 555.565 281.647C554.272 281.647 553.626 282.455 553.464 283.001ZM562.968 286.172H565.796V289H562.968V286.172Z"/>
                             <path data-room="6" d="M560.635 141.354C560.635 144.081 558.777 146.202 555.828 146.202C552.636 146.202 550.616 143.475 550.616 139.334C550.616 134.789 552.899 132.062 556.312 132.062C559.1 132.062 560.514 134.001 560.514 135.92H558.09C557.969 135.274 557.565 134.264 555.908 134.264C554.151 134.264 553.02 135.476 552.899 138.243C553.686 137.314 554.717 136.647 556.434 136.647C558.999 136.647 560.635 138.667 560.635 141.354ZM555.868 139.011C554.252 139.011 553.606 140.203 553.606 141.617C553.606 143.031 554.252 144.222 555.868 144.222C557.484 144.222 558.13 143.031 558.13 141.617C558.13 140.203 557.484 139.011 555.868 139.011ZM562.968 143.172H565.796V146H562.968V143.172Z"/>
                         </g>
+                        <!-- the walking route (rooms are numbered along it, through the doors) -->
+                        <g class="museum-map-route" aria-hidden="true">
+                            <defs><marker id="route-arrow-a" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5L1 9" /></marker></defs>
+                            <path marker-mid="url(#route-arrow-a)" d="M84 566L128 420L268 215L435 215L430 415L650 365L655 190L560 535L262 480"/>
+                            <text class="museum-map-route__label" x="80" y="584">Entrance</text>
+                            <text class="museum-map-route__label" x="664" y="512">Stairs up</text>
+                        </g>
                         <g class="museum-map-stairs" aria-hidden="true"><rect x="712" y="522" width="60" height="58"/><path d="M712 534H772M712 546H772M712 558H772M712 570H772"/></g>
                     </g>
                     <!-- floor 2: rooms 9-13 -->
@@ -113,17 +121,23 @@
                             <path d="M300 330H400M440 330H640M680 330H784"/>
                         </g>
                         <g class="museum-map-labels museum-map-labels--text">
-                            <text data-room="9" x="86" y="147">9.</text>
-                            <text data-room="10" x="322" y="147">10.</text>
-                            <text data-room="11" x="582" y="147">11.</text>
-                            <text data-room="12" x="86" y="430">12.</text>
-                            <text data-room="13" x="322" y="360">13.</text>
+                            <text data-room="11" x="86" y="147">11.</text>
+                            <text data-room="12" x="322" y="147">12.</text>
+                            <text data-room="13" x="582" y="147">13.</text>
+                            <text data-room="10" x="86" y="430">10.</text>
+                            <text data-room="9" x="322" y="360">9.</text>
+                        </g>
+                        <g class="museum-map-route" aria-hidden="true">
+                            <path marker-mid="url(#route-arrow-a)" d="M742 551L560 470L180 500L180 260L430 225L670 225"/>
+                            <text class="museum-map-route__label" x="640" y="512">Stairs down</text>
                         </g>
                         <g class="museum-map-stairs" aria-hidden="true"><rect x="712" y="522" width="60" height="58"/><path d="M712 534H772M712 546H772M712 558H772M712 570H772"/></g>
                     </g>
-                    <!-- numbered markers, added by atlas.js from inventory.js -->
+                    <!-- one dot per object, added by atlas.js from inventory.js -->
                     <g id="floor-markers"></g>
                 </svg>
+                <p class="atlas__legend mono floor-legend"><span><b class="legend-room">1.</b>Room, numbered along the walking route</span><span><span class="legend-dot"></span>Object (point at it for its name)</span><span><span class="legend-line legend-line--route"></span>Route from the entrance, up the stairs</span></p>
+                </div>
                 </div>
                 <div class="room-list-wrap">
                     <p class="room-list__floor-label" id="room-list-floor" aria-live="polite">Floor 1</p>
@@ -156,7 +170,7 @@
         </div>
         <div class="site-footer__legal mono">
             <span>© 2024 The Stolen Archive</span>
-            <span>Inv. 001 — 030</span>
+            <span>Collection 001-030</span>
         </div>
     </footer>
 

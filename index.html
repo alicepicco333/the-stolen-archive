@@ -18,7 +18,7 @@
     <!-- HEADER: same on every page, set aria-current on the current link -->
     <header class="site-header">
         <div class="site-header__inner grid">
-            <a class="wordmark" href="index.html"><img class="wordmark__icon" src="images/favicon.svg" alt="" width="32" height="32"><span class="wordmark__text">The Stolen<br>Archive<span>.</span></span></a>
+            <a class="wordmark" href="index.html" aria-label="The Stolen Archive, home"><img class="wordmark__icon" src="images/favicon.svg" alt="" width="32" height="32"></a>
             <nav class="site-nav" aria-label="Main">
                 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">Menu</button>
                 <ul class="site-nav__links" id="nav-links">
@@ -41,12 +41,8 @@
 
     <main id="main">
 
-        <!-- HERO: meta line / title / rule / intro · facts / inventory strip -->
+        <!-- HERO: title / rule / intro · facts / inventory strip -->
         <section class="hero grid" aria-labelledby="hero-title">
-            <p class="hero__meta mono">
-                <span>Inv. 001 — 030</span>
-                <span>A virtual exhibition · DHDK, University of Bologna</span>
-            </p>
             <h1 class="hero__title" id="hero-title">
                 <span class="line"><span>The Stolen</span></span>
                 <span class="line"><span>Archive</span></span>
@@ -61,10 +57,10 @@
             </div>
             <dl class="hero__facts">
                 <div><dt>Objects</dt><dd>30</dd></div>
-                <div><dt>Continents</dt><dd>05</dd></div>
+                <div><dt>Continents</dt><dd>5</dd></div>
                 <div><dt>Rooms</dt><dd>13</dd></div>
-                <div><dt>Floors</dt><dd>02</dd></div>
-                <div><dt>Tours</dt><dd>03</dd></div>
+                <div><dt>Floors</dt><dd>2</dd></div>
+                <div><dt>Tours</dt><dd>3</dd></div>
             </dl>
             <!-- the 30 objects as a numbered strip, filled by home.js from inventory.js -->
             <ol class="hero__strip" id="hero-strip" aria-label="The thirty objects"></ol>
@@ -83,11 +79,15 @@
                 <p class="section-label"><b>§01</b> Timeline</p>
                 <h2 class="section-title" id="eras-title" data-reveal>Five eras of appropriation</h2>
                 <div class="eras__tabs tabs" id="era-tabs" role="tablist" aria-label="Eras"></div>
-                <div class="eras__text" id="era-panel" role="tabpanel" data-reveal>
-                    <h3 id="era-title"></h3>
-                    <p id="era-text"></p>
+                <!-- text and images in one panel of fixed height, under the tabs: all three fit
+                     one screen and switching eras does not move the page -->
+                <div class="eras__body" id="era-panel" role="tabpanel" tabindex="0">
+                    <div class="eras__text" id="era-text-wrap" data-reveal>
+                        <h3 id="era-title"></h3>
+                        <p id="era-text"></p>
+                    </div>
+                    <div class="eras__images" id="era-images" data-reveal style="--delay: .1s"></div>
                 </div>
-                <div class="eras__images" id="era-images" data-reveal style="--delay: .1s"></div>
             </div>
         </section>
 
@@ -187,7 +187,7 @@
         </div>
         <div class="site-footer__legal mono">
             <span>© 2024 The Stolen Archive</span>
-            <span>Inv. 001 — 030</span>
+            <span>Collection 001-030</span>
         </div>
     </footer>
 

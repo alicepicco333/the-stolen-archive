@@ -67,13 +67,33 @@ document.addEventListener('DOMContentLoaded', () => {
         return m ? { name: m[1], range: m[2] } : { name: t, range: '' };
     };
 
+    const panel = document.getElementById('era-panel');
+    const textWrap = document.getElementById('era-text-wrap');
+    let current = -1;
+
+    // the panel keeps one height (site.css), so only its content changes: the text rises in,
+    // the images wipe in from the left. Reduced motion: the content is swapped at once.
+    function replay(el) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        el.classList.remove('eras__swap');
+        void el.offsetWidth; // restart the animation
+        el.classList.add('eras__swap');
+    }
+
     function show(index, focus) {
+        if (index === current) { if (focus) tabList.children[index].focus(); return; }
+        const first = current === -1;
+        current = index;
         const era = eras[index];
         tabList.querySelectorAll('.tab').forEach((tab, i) => {
             tab.setAttribute('aria-selected', String(i === index));
             tab.tabIndex = i === index ? 0 : -1;
         });
-        if (focus) tabList.children[index].focus();
+        panel?.setAttribute('aria-labelledby', `era-tab-${index}`);
+        if (focus) {
+            tabList.children[index].focus();
+            tabList.children[index].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
         const { name, range } = split(era.title);
         title.innerHTML = `${name}<span class="mono">${range}</span>`;
         text.textContent = era.description;
@@ -84,10 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const img = document.createElement('img');
             img.src = src;
             img.alt = '';
-            img.loading = 'lazy';
+            img.loading = first ? 'lazy' : 'eager';
             figure.appendChild(img);
             images.appendChild(figure);
         });
+        if (!first) { replay(textWrap); replay(images); }
     }
 
     eras.forEach((era, i) => {
@@ -100,10 +121,15 @@ document.addEventListener('DOMContentLoaded', () => {
         tab.setAttribute('aria-controls', 'era-panel');
         tab.innerHTML = `${name}<small>${range}</small>`;
         tab.addEventListener('click', () => show(i));
-        // arrow keys move between tabs
+        // WAI-ARIA tabs: arrows move and select, Home and End jump to the ends
         tab.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') show((i + 1) % eras.length, true);
-            if (e.key === 'ArrowLeft') show((i - 1 + eras.length) % eras.length, true);
+            const keys = {
+                ArrowRight: (i + 1) % eras.length,
+                ArrowLeft: (i - 1 + eras.length) % eras.length,
+                Home: 0,
+                End: eras.length - 1,
+            };
+            if (e.key in keys) { e.preventDefault(); show(keys[e.key], true); }
         });
         tabList.appendChild(tab);
     });

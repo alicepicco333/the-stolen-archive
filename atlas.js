@@ -16,7 +16,7 @@
   // world: object list
   list.innerHTML = INVENTORY.map((o) => `
     <li><a href="Object-page.html?no=${o.no}" data-no="${o.no}">
-      <span class="mono">${pad3(o.no)}</span>
+      <span class="mono">${invNo(o.no)}</span>
       <span class="atlas-list__title">${o.title}</span>
       <span class="atlas-list__route mono">${o.from.label.split(',')[0]} → ${held(o).split(',')[0]}</span>
       ${o.returned ? `<span class="atlas-list__route mono returned">${o.returned}</span>` : ''}
@@ -38,9 +38,11 @@
     a.setAttribute('href', `Object-page.html?no=${o.no}`);
     a.setAttribute('data-no', o.no);
     a.setAttribute('data-floor', o.floor);
-    a.setAttribute('aria-label', `${pad3(o.no)} ${o.title}, floor ${o.floor}, room ${o.room}`);
+    a.setAttribute('aria-label', `${invNo(o.no)} ${o.title}, ${roomLabel(o.room)}`);
+    // a plain dot: only the rooms are numbered on the plan; the name is in the room list,
+    // the link's label and the tooltip. The invisible ring gives a larger hit area.
     a.innerHTML = `<g class="floor-marker" transform="translate(${o.pin[0]} ${o.pin[1] + 21})">
-      <circle r="17"/><text dy="5">${o.no}</text></g>`;
+      <title>${invNo(o.no)} ${o.title}</title><circle class="floor-marker__hit" r="22"/><circle class="floor-marker__dot" r="8"/></g>`;
     markers.appendChild(a);
   });
 
@@ -49,8 +51,8 @@
   INVENTORY.forEach((o) => (byRoom[o.room] ??= []).push(o));
   rooms.innerHTML = Object.keys(ROOMS).filter((r) => byRoom[r]).map((r) => `
     <li data-floor="${byRoom[r][0].floor}">
-      <h3><span class="mono">R${r}</span> ${ROOMS[r]}</h3>
-      <ul>${byRoom[r].map((o) => `<li><a href="Object-page.html?no=${o.no}" data-no="${o.no}"><span class="mono">${pad3(o.no)}</span> ${o.title}</a></li>`).join('')}</ul>
+      <h3><span class="mono">Room ${r}</span> ${ROOMS[r]}</h3>
+      <ul>${byRoom[r].map((o) => `<li><a href="Object-page.html?no=${o.no}" data-no="${o.no}"><span class="mono">${invNo(o.no)}</span> ${o.title}</a></li>`).join('')}</ul>
     </li>`).join('');
   showFloor(1);
   showMarkers(1);

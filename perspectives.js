@@ -44,9 +44,11 @@ const Perspectives = {
       return list;
     };
 
-    // returned objects: the label's stamp says so instead of "Removed from ..."
+    // the label's stamp shows the object's restitution status as a rubber stamp (quirks.js);
+    // without quirks.js, returned objects still say so instead of "Removed from ..."
     const stamp = document.getElementById('object-stamp');
-    if (stamp && entry.status.kind === 'returned') stamp.textContent = entry.status.label;
+    if (stamp && typeof Quirks !== 'undefined') Quirks.applyStamp(stamp, Number(no), entry.status);
+    else if (stamp && entry.status.kind === 'returned') stamp.textContent = entry.status.label;
 
     // status
     const status = document.getElementById('persp-status');

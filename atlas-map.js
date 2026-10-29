@@ -34,6 +34,9 @@ function createAtlasMap(el, { onSelect, bounds = [[-45, -160], [66, 178]] } = {}
     else { map.dragging.disable(); map.fitBounds(bounds, { animate: false }); }
   });
   map.on('resize', () => { if (!map.dragging.enabled()) fit(); });
+  // the map fills its column (it ends level with the text beside it), so its size can change
+  // without a window resize, for example when the fonts arrive
+  if ('ResizeObserver' in window) new ResizeObserver(() => map.invalidateSize({ animate: false })).observe(el);
 
   // trackpad pinch (and ctrl + mouse wheel) zooms around the pointer; browsers report a
   // pinch as a wheel event with ctrlKey. A two-finger scroll without it scrolls the page.
@@ -91,18 +94,114 @@ function createAtlasMap(el, { onSelect, bounds = [[-45, -160], [66, 178]] } = {}
     return pts;
   }
 
-  const icon = (cls) => L.divIcon({ className: cls, iconSize: [12, 12], iconAnchor: [6, 6] });
+  // every item is a dot (site.css draws it in the middle); the icon box itself is the hit
+  // area: 24px, 44px on touch. Objects from the same place sit in a tight cluster, each dot
+  // nudged 7px along a small circle, so none hides another and no count badge is needed.
+  const hit = window.matchMedia('(pointer: coarse)').matches ? 44 : 24;
+  const placed = {};
+  const icon = (cls, coords) => {
+    let dx = 0;
+    let dy = 0;
+    if (coords) {
+      const key = coords.join();
+      const k = (placed[key] = (placed[key] || 0) + 1) - 1;
+      if (k > 0) { dx = Math.round(7 * Math.cos(k * 2.1)); dy = Math.round(7 * Math.sin(k * 2.1)); }
+    }
+    return L.divIcon({ className: cls, iconSize: [hit, hit], iconAnchor: [hit / 2 - dx, hit / 2 - dy] });
+  };
   const arcs = {};
   const origins = {};
   const holders = new Set();
 
+  // ---------- the pop-up ----------
+  // One pop-up per map, placed at body level (position: fixed) at the marker's screen
+  // position, so the map's clipped edge never cuts it. It flips below the marker near the
+  // top of the screen, shifts inward near the sides, follows the marker while the map is
+  // zoomed or dragged and hides when the marker leaves the map or the screen.
+  // Pointer: it opens on hover or keyboard focus. Touch: a tap docks it to the bottom of the
+  // screen with a link and a close button. Escape closes it.
+  const touch = window.matchMedia('(hover: none)');
+  const pop = document.createElement('div');
+  pop.className = 'atlas-tip atlas-pop';
+  pop.id = `atlas-pop-${Math.random().toString(36).slice(2, 8)}`;
+  pop.setAttribute('role', 'tooltip');
+  pop.hidden = true;
+  document.body.appendChild(pop);
+  let open = null; // { marker, href }
+
+  function placePop() {
+    if (!open || pop.hidden || pop.classList.contains('is-docked')) return;
+    const box = el.getBoundingClientRect();
+    const p = map.latLngToContainerPoint(open.marker.getLatLng());
+    const x = box.left + p.x;
+    const y = box.top + p.y;
+    const outside = p.x < 0 || p.y < 0 || p.x > box.width || p.y > box.height || y < 0 || y > window.innerHeight;
+    pop.style.visibility = outside ? 'hidden' : '';
+    if (outside) return;
+    const m = 8;
+    const w = pop.offsetWidth;
+    const h = pop.offsetHeight;
+    let top = y - 14 - h;                                     // above the marker
+    if (top < m) top = y + 14;                                // no room above: below it
+    top = Math.max(m, Math.min(top, window.innerHeight - m - h));
+    const left = Math.max(m, Math.min(x - w / 2, window.innerWidth - m - w));
+    pop.style.left = `${left}px`;
+    pop.style.top = `${top}px`;
+  }
+  function showPop(marker, html, href, docked) {
+    open = { marker, href };
+    pop.classList.toggle('is-docked', docked);
+    pop.setAttribute('role', docked ? 'dialog' : 'tooltip');
+    pop.innerHTML = html + (docked ? `<p class="atlas-pop__actions">${href ? `<a class="btn btn--signal" href="${href}">Open the object page</a>` : ''}<button type="button" class="btn">Close</button></p>` : '');
+    pop.hidden = false;
+    marker.getElement()?.setAttribute('aria-describedby', pop.id);
+    if (docked) {
+      pop.style.left = ''; pop.style.top = ''; pop.style.visibility = '';
+      pop.querySelector('button').addEventListener('click', () => { const mk = open?.marker; hidePop(); mk?.getElement()?.focus(); });
+    } else placePop();
+  }
+  function hidePop() {
+    if (!open) return;
+    open.marker.getElement()?.removeAttribute('aria-describedby');
+    open = null;
+    pop.hidden = true;
+  }
+  map.on('move zoom resize', placePop);
+  window.addEventListener('scroll', placePop, { passive: true });
+  window.addEventListener('resize', placePop);
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !open) return;
+    const mk = open.marker;
+    const docked = pop.classList.contains('is-docked');
+    hidePop();
+    if (docked) mk.getElement()?.focus();
+  });
+  document.addEventListener('pointerdown', (e) => {
+    if (open && pop.classList.contains('is-docked') && !pop.contains(e.target) && !el.contains(e.target)) hidePop();
+  });
+
+  // pointer: hover or focus shows it; touch: a first tap docks it, a second tap on the same marker follows the link
+  function bindPop(marker, html, href, select) {
+    marker.on('mouseover focus', () => { if (!touch.matches) showPop(marker, html, href, false); });
+    marker.on('mouseout blur', () => { if (!touch.matches && open?.marker === marker) hidePop(); });
+    marker.on('click keypress', (e) => {
+      const key = e.originalEvent?.key;
+      if (e.type === 'keypress' && key !== 'Enter') return;
+      if (touch.matches && !(open?.marker === marker && pop.classList.contains('is-docked'))) {
+        showPop(marker, html, href, true);
+        return;
+      }
+      if (select) select();
+    });
+  }
+
   INVENTORY.forEach((o) => {
-    const label = `${pad3(o.no)} ${o.title}`;
-    const origin = L.marker(o.from.coords, { icon: icon('atlas-origin'), title: `${label}: taken from ${o.from.label}`, keyboard: true }).addTo(map);
-    origin.bindTooltip(`${label}<br>from ${o.from.label}<br>${o.returned ? `held in ${o.to.label}<br>${o.returned}` : `now ${o.to ? o.to.label : 'in various museums'}`}`, { className: 'atlas-tip', direction: 'top', offset: [0, -8] });
+    const label = `${invNo(o.no)} ${o.title}`;
+    const origin = L.marker(o.from.coords, { icon: icon('atlas-origin', o.from.coords), title: `${label}: taken from ${o.from.label}`, keyboard: true }).addTo(map);
+    bindPop(origin, `${label}<br>from ${o.from.label}<br>${o.returned ? `held in ${o.to.label}<br>${o.returned}` : `now ${o.to ? o.to.label : 'in various museums'}`}`,
+      `Object-page.html?no=${o.no}`, onSelect ? () => onSelect(o.no) : null);
     origin.on('mouseover focus', () => highlight(o.no));
     origin.on('mouseout blur', () => highlight(null));
-    if (onSelect) origin.on('click keypress', () => onSelect(o.no));
     origins[o.no] = origin;
 
     if (!o.to || o.to.coords.join() === o.from.coords.join()) return; // no single destination, or never left
@@ -111,12 +210,16 @@ function createAtlasMap(el, { onSelect, bounds = [[-45, -160], [66, 178]] } = {}
     if (!holders.has(o.to.label)) {
       holders.add(o.to.label);
       const here = INVENTORY.filter((x) => x.to && x.to.label === o.to.label);
-      const held = here.map((x) => `${pad3(x.no)} ${x.title}${x.returned ? ' <i>(since returned)</i>' : ''}`);
+      const held = here.map((x) => `${invNo(x.no)} ${x.title}${x.returned ? ' <i>(since returned)</i>' : ''}`);
       // a city whose objects have all gone back is a former holder: hollow square
       const former = here.every((x) => x.returned);
-      L.marker(o.to.coords, { icon: icon(`atlas-holder${former ? ' is-former' : ''}`), title: `${former ? 'Formerly held in' : 'Held in'} ${o.to.label}`, keyboard: true })
-        .addTo(map)
-        .bindTooltip(`<b>${o.to.label}</b><br>${held.join('<br>')}`, { className: 'atlas-tip', direction: 'top', offset: [0, -8] });
+      const holder = L.marker(o.to.coords, { icon: icon(`atlas-holder${former ? ' is-former' : ''}`), title: `${former ? 'Formerly held in' : 'Held in'} ${o.to.label}`, keyboard: true })
+        .addTo(map);
+      // on touch the docked list links to each object
+      const linked = here.map((x) => `<a href="Object-page.html?no=${x.no}">${invNo(x.no)} ${x.title}</a>${x.returned ? ' <i>(since returned)</i>' : ''}`);
+      holder.on('mouseover focus', () => { if (!touch.matches) showPop(holder, `<b>${o.to.label}</b><br>${held.join('<br>')}`, null, false); });
+      holder.on('mouseout blur', () => { if (!touch.matches && open?.marker === holder) hidePop(); });
+      holder.on('click', () => { if (touch.matches) showPop(holder, `<b>${o.to.label}</b><br>${linked.join('<br>')}`, null, true); });
     }
   });
 

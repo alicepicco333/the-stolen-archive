@@ -14,8 +14,9 @@
   grid.innerHTML = INVENTORY.map((o) => `
     <li class="card" data-region="${o.region}" data-reveal>
       <a href="${link(o)}">
-        <figure class="duotone card__image"><img src="${o.images[0]}" alt="" loading="lazy"></figure>
-        <p class="card__meta mono"><span>${pad3(o.no)}</span><span>R${o.room}</span></p>
+        <span class="hang-tag" aria-hidden="true">${pad3(o.no)}</span>
+        <div class="card__visual"><figure class="duotone card__image"><img src="${o.images[0]}" alt="" loading="lazy"></figure></div>
+        <p class="card__meta mono"><span class="visually-hidden">${invNo(o.no)}, </span><span>${roomLabel(o.room)}</span></p>
         <h2 class="card__title">${o.title}</h2>
         <p class="card__route mono">${o.from.label} <span aria-hidden="true">→</span><span class="visually-hidden">, now in</span> ${held(o)}</p>
         ${o.how ? `<p class="card__how">${o.how.label}</p>` : ''}
@@ -23,13 +24,33 @@
       </a>
     </li>`).join('');
 
+  // the status stamp under each title, and the museum's wording crossed out beside the field
+  // it belongs to (quirks.js, perspectives.json, data/museum-wording.json)
+  if (typeof Quirks !== 'undefined') {
+    Promise.all([Quirks.loadStatuses(), Quirks.loadWording()]).then(([statuses]) => {
+      INVENTORY.forEach((o) => {
+        const a = grid.querySelector(`a[href="${link(o)}"]`);
+        if (!a) return;
+        const add = (after, html) => { if (after && html) after.insertAdjacentHTML('afterend', html); };
+        const words = (field, cls) => {
+          const list = Quirks.wordingFor(o.no, field);
+          return list.length ? `<p class="card__wording ${cls}">${Quirks.wordingHTML(list)}</p>` : '';
+        };
+        add(a.querySelector('.card__route'), words('held today', 'card__wording--held'));
+        add(a.querySelector('.card__how'), words('how it left', 'card__wording--how'));
+        add(a.querySelector('.card__returned'), words('status/return', 'card__wording--status'));
+        a.querySelector('.card__visual')?.insertAdjacentHTML('beforeend', Quirks.stampHTML(o.no, statuses[o.no]));
+      });
+    });
+  }
+
   table.querySelector('tbody').innerHTML = INVENTORY.map((o) => `
     <tr data-region="${o.region}">
-      <td class="mono">${pad3(o.no)}</td>
+      <td class="mono">${invNo(o.no)}</td>
       <th scope="row"><a href="${link(o)}">${o.title}</a></th>
       <td>${o.from.label}${o.how ? `<br><span class="card__how">${o.how.label}</span>` : ''}</td>
       <td>${held(o)}${o.returned ? `<br><span class="mono returned">${o.returned}</span>` : ''}</td>
-      <td class="mono">R${o.room} · ${ROOMS[o.room]}</td>
+      <td class="mono">${roomLabel(o.room)} · ${ROOMS[o.room]}</td>
     </tr>`).join('');
 
   function update() {

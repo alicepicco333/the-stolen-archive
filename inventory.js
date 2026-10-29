@@ -47,21 +47,21 @@ const INVENTORY = [
   { no: 13, region: 'Asia', title: "Altar of Pergamon", room: 1, floor: 1, pin: [106, 289], from: { label: "Pergamon (Bergama), Türkiye", coords: [39.1202, 27.1833] }, to: PLACES.berlin, how: { kind: 'excavation', label: "Excavated and shipped to Berlin under agreements with the Ottoman government, 1878–1886" }, images: ['images/cropped-pergamon1.jpg', 'images/cropped-pergamon2.jpg', 'images/cropped-pergamon3.jpg'] },
   { no: 14, region: 'Asia', title: "Tipu's Tiger", room: 2, floor: 1, pin: [300, 259], from: { label: "Srirangapatna (Kingdom of Mysore), India", coords: [12.4181, 76.6947] }, to: PLACES.london, how: { kind: 'war', label: "Looted by British troops after the fall of Srirangapatna, 1799" }, images: ['images/cropped-tiputiger1.jpg', 'images/cropped-tiputiger2.jpg', 'images/cropped-tiputiger3.jpg'] },
   { no: 15, region: 'Africa', title: "Mask of Queen Idia", room: 3, floor: 1, pin: [482, 244], from: { label: "Benin City (Kingdom of Benin), Nigeria", coords: [6.3392, 5.6173] }, to: PLACES.london, how: { kind: 'war', label: "Seized in the British attack on Benin City, 1897" }, images: ['images/cropped-maskqueen1.jpg', 'images/cropped-maskqueen2.jpg', 'images/cropped-maskqueen3.jpg'] },
-  { no: 16, region: 'Africa', title: "Rosetta Stone", room: 9, floor: 2, pin: [120, 160], from: { label: "Rashid (Rosetta), Egypt", coords: [31.4044, 30.4164] }, to: PLACES.london, how: { kind: 'treaty', label: "Handed from the French to the British army under the Capitulation of Alexandria, 1801" }, images: ['images/obj16-rosetta-1.jpg', 'images/obj16-rosetta-2.jpg', 'images/obj16-rosetta-3.jpg'] },
-  { no: 17, region: 'Africa', title: "Dendera Zodiac", room: 10, floor: 2, pin: [350, 150], from: { label: "Temple of Hathor, Dendera, Egypt", coords: [26.1417, 32.67] }, to: PLACES.paris, how: { kind: 'permit', label: "Cut out for a Paris collector under a permit from Muhammad Ali's government, 1820" }, images: ['images/obj17-dendera-1.jpg', 'images/obj17-dendera-2.jpg', 'images/obj17-dendera-3.jpg'] },
-  { no: 18, region: 'Americas', title: "Paracas Textiles", room: 13, floor: 2, pin: [620, 420], from: { label: "Paracas peninsula, Ica, Peru", coords: [-13.83, -76.25] }, to: PLACES.gothenburg, returned: 'Returned to Peru 2014–2021', how: { kind: 'trade', label: "Exported illegally by the Swedish consul in Lima, 1930s" }, images: ['images/obj18-paracas-1.jpg', 'images/obj18-paracas-2.jpg', 'images/obj18-paracas-3.jpg'] },
-  { no: 19, region: 'Africa', title: "Ngonnso'", room: 10, floor: 2, pin: [470, 250], from: { label: "Kumbo (Nso' kingdom), Cameroon", coords: [6.2167, 10.6833] }, to: PLACES.berlin, how: { kind: 'war', label: "Seized in a German colonial campaign, 1902" }, images: ['images/obj19-ngonnso-1.jpg'] },
-  { no: 20, region: 'Asia', title: "Diamond Sutra", room: 9, floor: 2, pin: [220, 160], from: { label: "Mogao Caves, Dunhuang (Qing China), China", coords: [40.0425, 94.8042] }, to: PLACES.london, how: { kind: 'sale', label: "Sold by the caves' guardian to Aurel Stein for a small donation, 1907" }, images: ['images/obj20-diamond-sutra-1.jpg', 'images/obj20-diamond-sutra-2.jpg'] },
-  { no: 21, region: 'Asia', title: "Oegyujanggak Uigwe", room: 9, floor: 2, pin: [120, 290], from: { label: "Ganghwa Island (Joseon Korea), South Korea", coords: [37.747, 126.487] }, to: PLACES.paris, returned: 'Returned to Korea in 2011 (renewable loan)', how: { kind: 'war', label: "Seized by French troops, 1866" }, images: ['images/obj21-uigwe-1.jpg', 'images/obj21-uigwe-2.jpg', 'images/obj21-uigwe-3.jpg'] },
-  { no: 22, region: 'Asia', title: "Ishtar Gate", room: 10, floor: 2, pin: [450, 150], from: { label: "Babylon, Iraq", coords: [32.5364, 44.421] }, to: PLACES.berlin, how: { kind: 'excavation', label: "Excavated by a German team and shipped in a division of finds under the British mandate, 1926–1927" }, images: ['images/obj22-ishtar-1.jpg', 'images/obj22-ishtar-2.jpg', 'images/obj22-ishtar-3.jpg'] },
-  { no: 23, region: 'Oceania', title: "Gweagal Shield", room: 12, floor: 2, pin: [120, 470], from: { label: "Kamay (Botany Bay), Gweagal country, Australia", coords: [-34.0045, 151.221] }, to: PLACES.london, how: { kind: 'contact', label: "Taken by James Cook's crew at first contact, 1770 (identification debated)" }, images: ['images/obj23-gweagal-2.jpg', 'images/obj23-gweagal-1.jpg', 'images/obj23-gweagal-3.jpg'] },
-  { no: 24, region: 'Oceania', title: "Kalaniʻōpuʻu's Cloak and Helmet", room: 12, floor: 2, pin: [220, 470], from: { label: "Kealakekua Bay, Hawaiʻi (USA)", coords: [19.475, -155.9214] }, to: PLACES.wellington, returned: 'Returned to Hawaiʻi in 2016, permanently in 2020', how: { kind: 'gift', label: "Given to James Cook, 1779, then sold between collectors" }, images: ['images/obj24-kalaniopuu-1.jpg', 'images/obj24-kalaniopuu-2.jpg'] },
-  { no: 25, region: 'Americas', title: "Moctezuma's Headdress", room: 13, floor: 2, pin: [380, 420], from: { label: "Tenochtitlan (Aztec Empire), Mexico", coords: [19.4326, -99.1332] }, to: PLACES.vienna, how: { kind: 'conquest', label: "Sent to Europe after the Spanish conquest; route unknown" }, images: ['images/obj25-penacho-1.jpg', 'images/obj25-penacho-2.jpg'] },
-  { no: 26, region: 'Americas', title: "Quimbaya Treasure", room: 13, floor: 2, pin: [500, 420], from: { label: "Filandia, Quindío, Colombia", coords: [4.675, -75.6583] }, to: PLACES.madrid, how: { kind: 'gift', label: "Given by Colombia's president to the Spanish queen regent, 1893" }, images: ['images/obj26-quimbaya-1.jpg', 'images/obj26-quimbaya-2.jpg', 'images/obj26-quimbaya-3.jpg'] },
-  { no: 27, region: 'Europe', title: "Horses of Saint Mark", room: 11, floor: 2, pin: [620, 190], from: { label: "Constantinople (Byzantine Empire), Türkiye", coords: [41.0082, 28.9784] }, to: PLACES.venice, how: { kind: 'war', label: "Seized by Venice in 1204 and by Napoleon in 1797" }, images: ['images/obj27-saint-mark-horses-1.jpg', 'images/obj27-saint-mark-horses-2.jpg', 'images/obj27-saint-mark-horses-3.jpg'] },
-  { no: 28, region: 'Europe', title: "Ghent Altarpiece", room: 10, floor: 2, pin: [350, 250], from: { label: "Ghent, Belgium", coords: [51.053, 3.7275] }, to: PLACES.altaussee, returned: 'Returned to Ghent in 1945', how: { kind: 'war', label: "Seized by revolutionary France, sold, stolen and seized by Nazi Germany, 1794–1942" }, images: ['images/obj28-ghent-1.jpg', 'images/obj28-ghent-2.jpg', 'images/obj28-ghent-3.jpg'] },
-  { no: 29, region: 'Asia', title: "Priam's Treasure", room: 11, floor: 2, pin: [720, 190], from: { label: "Troy (Hisarlık, Ottoman Empire), Türkiye", coords: [39.9575, 26.2389] }, to: PLACES.moscow, how: { kind: 'war', label: "Smuggled out of the Ottoman Empire, 1873; seized by the Red Army, 1945" }, images: ['images/obj29-priam-1.jpg', 'images/obj29-priam-2.jpg', 'images/obj29-priam-3.jpg'] },
-  { no: 30, region: 'Europe', title: "Codex Gigas", room: 9, floor: 2, pin: [220, 290], from: { label: "Prague Castle (Kingdom of Bohemia), Czechia", coords: [50.0755, 14.4378] }, to: PLACES.stockholm, how: { kind: 'war', label: "Seized by the Swedish army at the end of the Thirty Years' War, 1648" }, images: ['images/obj30-codex-gigas-1.jpg', 'images/obj30-codex-gigas-2.jpg', 'images/obj30-codex-gigas-3.jpg'] },
+  { no: 16, region: 'Africa', title: "Rosetta Stone", room: 11, floor: 2, pin: [120, 160], from: { label: "Rashid (Rosetta), Egypt", coords: [31.4044, 30.4164] }, to: PLACES.london, how: { kind: 'treaty', label: "Handed from the French to the British army under the Capitulation of Alexandria, 1801" }, images: ['images/obj16-rosetta-1.jpg', 'images/obj16-rosetta-2.jpg', 'images/obj16-rosetta-3.jpg'] },
+  { no: 17, region: 'Africa', title: "Dendera Zodiac", room: 12, floor: 2, pin: [350, 150], from: { label: "Temple of Hathor, Dendera, Egypt", coords: [26.1417, 32.67] }, to: PLACES.paris, how: { kind: 'permit', label: "Cut out for a Paris collector under a permit from Muhammad Ali's government, 1820" }, images: ['images/obj17-dendera-1.jpg', 'images/obj17-dendera-2.jpg', 'images/obj17-dendera-3.jpg'] },
+  { no: 18, region: 'Americas', title: "Paracas Textiles", room: 9, floor: 2, pin: [620, 420], from: { label: "Paracas peninsula, Ica, Peru", coords: [-13.83, -76.25] }, to: PLACES.gothenburg, returned: 'Returned to Peru 2014–2021', how: { kind: 'trade', label: "Exported illegally by the Swedish consul in Lima, 1930s" }, images: ['images/obj18-paracas-1.jpg', 'images/obj18-paracas-2.jpg', 'images/obj18-paracas-3.jpg'] },
+  { no: 19, region: 'Africa', title: "Ngonnso'", room: 12, floor: 2, pin: [470, 250], from: { label: "Kumbo (Nso' kingdom), Cameroon", coords: [6.2167, 10.6833] }, to: PLACES.berlin, how: { kind: 'war', label: "Seized in a German colonial campaign, 1902" }, images: ['images/obj19-ngonnso-1.jpg'] },
+  { no: 20, region: 'Asia', title: "Diamond Sutra", room: 11, floor: 2, pin: [220, 160], from: { label: "Mogao Caves, Dunhuang (Qing China), China", coords: [40.0425, 94.8042] }, to: PLACES.london, how: { kind: 'sale', label: "Sold by the caves' guardian to Aurel Stein for a small donation, 1907" }, images: ['images/obj20-diamond-sutra-1.jpg', 'images/obj20-diamond-sutra-2.jpg'] },
+  { no: 21, region: 'Asia', title: "Oegyujanggak Uigwe", room: 11, floor: 2, pin: [120, 290], from: { label: "Ganghwa Island (Joseon Korea), South Korea", coords: [37.747, 126.487] }, to: PLACES.paris, returned: 'Returned to Korea in 2011 (renewable loan)', how: { kind: 'war', label: "Seized by French troops, 1866" }, images: ['images/obj21-uigwe-1.jpg', 'images/obj21-uigwe-2.jpg', 'images/obj21-uigwe-3.jpg'] },
+  { no: 22, region: 'Asia', title: "Ishtar Gate", room: 12, floor: 2, pin: [450, 150], from: { label: "Babylon, Iraq", coords: [32.5364, 44.421] }, to: PLACES.berlin, how: { kind: 'excavation', label: "Excavated by a German team and shipped in a division of finds under the British mandate, 1926–1927" }, images: ['images/obj22-ishtar-1.jpg', 'images/obj22-ishtar-2.jpg', 'images/obj22-ishtar-3.jpg'] },
+  { no: 23, region: 'Oceania', title: "Gweagal Shield", room: 10, floor: 2, pin: [120, 470], from: { label: "Kamay (Botany Bay), Gweagal country, Australia", coords: [-34.0045, 151.221] }, to: PLACES.london, how: { kind: 'contact', label: "Taken by James Cook's crew at first contact, 1770 (identification debated)" }, images: ['images/obj23-gweagal-2.jpg', 'images/obj23-gweagal-1.jpg', 'images/obj23-gweagal-3.jpg'] },
+  { no: 24, region: 'Oceania', title: "Kalaniʻōpuʻu's Cloak and Helmet", room: 10, floor: 2, pin: [220, 470], from: { label: "Kealakekua Bay, Hawaiʻi (USA)", coords: [19.475, -155.9214] }, to: PLACES.wellington, returned: 'Returned to Hawaiʻi in 2016, permanently in 2020', how: { kind: 'gift', label: "Given to James Cook, 1779, then sold between collectors" }, images: ['images/obj24-kalaniopuu-1.jpg', 'images/obj24-kalaniopuu-2.jpg'] },
+  { no: 25, region: 'Americas', title: "Moctezuma's Headdress", room: 9, floor: 2, pin: [380, 420], from: { label: "Tenochtitlan (Aztec Empire), Mexico", coords: [19.4326, -99.1332] }, to: PLACES.vienna, how: { kind: 'conquest', label: "Sent to Europe after the Spanish conquest; route unknown" }, images: ['images/obj25-penacho-1.jpg', 'images/obj25-penacho-2.jpg'] },
+  { no: 26, region: 'Americas', title: "Quimbaya Treasure", room: 9, floor: 2, pin: [500, 420], from: { label: "Filandia, Quindío, Colombia", coords: [4.675, -75.6583] }, to: PLACES.madrid, how: { kind: 'gift', label: "Given by Colombia's president to the Spanish queen regent, 1893" }, images: ['images/obj26-quimbaya-1.jpg', 'images/obj26-quimbaya-2.jpg', 'images/obj26-quimbaya-3.jpg'] },
+  { no: 27, region: 'Europe', title: "Horses of Saint Mark", room: 13, floor: 2, pin: [620, 190], from: { label: "Constantinople (Byzantine Empire), Türkiye", coords: [41.0082, 28.9784] }, to: PLACES.venice, how: { kind: 'war', label: "Seized by Venice in 1204 and by Napoleon in 1797" }, images: ['images/obj27-saint-mark-horses-1.jpg', 'images/obj27-saint-mark-horses-2.jpg', 'images/obj27-saint-mark-horses-3.jpg'] },
+  { no: 28, region: 'Europe', title: "Ghent Altarpiece", room: 12, floor: 2, pin: [350, 250], from: { label: "Ghent, Belgium", coords: [51.053, 3.7275] }, to: PLACES.altaussee, returned: 'Returned to Ghent in 1945', how: { kind: 'war', label: "Seized by revolutionary France, sold, stolen and seized by Nazi Germany, 1794–1942" }, images: ['images/obj28-ghent-1.jpg', 'images/obj28-ghent-2.jpg', 'images/obj28-ghent-3.jpg'] },
+  { no: 29, region: 'Asia', title: "Priam's Treasure", room: 13, floor: 2, pin: [720, 190], from: { label: "Troy (Hisarlık, Ottoman Empire), Türkiye", coords: [39.9575, 26.2389] }, to: PLACES.moscow, how: { kind: 'war', label: "Smuggled out of the Ottoman Empire, 1873; seized by the Red Army, 1945" }, images: ['images/obj29-priam-1.jpg', 'images/obj29-priam-2.jpg', 'images/obj29-priam-3.jpg'] },
+  { no: 30, region: 'Europe', title: "Codex Gigas", room: 11, floor: 2, pin: [220, 290], from: { label: "Prague Castle (Kingdom of Bohemia), Czechia", coords: [50.0755, 14.4378] }, to: PLACES.stockholm, how: { kind: 'war', label: "Seized by the Swedish army at the end of the Thirty Years' War, 1648" }, images: ['images/obj30-codex-gigas-1.jpg', 'images/obj30-codex-gigas-2.jpg', 'images/obj30-codex-gigas-3.jpg'] },
 ];
 
 // Museum rooms, as named in the documentation (room 8 has no objects).
@@ -75,11 +75,11 @@ const ROOMS = {
   6: "Monumental Sculptures",
   7: "Scientific and Technological Achievements",
   8: "—",
-  9: "Writing and Knowledge",
-  10: "Sacred Places and Images",
-  11: "Trophies of War",
-  12: "Gifts and Seizures",
-  13: "Feather, Gold and Cloth",
+  9: "Feather, Gold and Cloth",
+  10: "Gifts and Seizures",
+  11: "Writing and Knowledge",
+  12: "Sacred Places and Images",
+  13: "Trophies of War",
 };
 
 // Why the objects of each room are together (same text as the room table in the documentation)
@@ -91,14 +91,18 @@ const ROOM_NOTES = {
   5: "The work of a royal guild: the casters of the Benin court.",
   6: "Large-scale stone sculpture from Rapa Nui and Persepolis.",
   7: "Scientific instruments taken as trophies of war and returned by treaty.",
-  9: "Inscriptions, books and archives: the written record of states, faiths and scholars.",
-  10: "Objects made for temples, palaces and churches, removed from the places they belonged to.",
-  11: "Objects that changed hands again and again as spoils of war.",
-  12: "Two meetings with James Cook's voyages: one a seizure, one a gift.",
-  13: "Materials of power in the Americas: Paracas cloth, Mexica featherwork and Quimbaya gold.",
+  9: "Materials of power in the Americas: Paracas cloth, Mexica featherwork and Quimbaya gold.",
+  10: "Two meetings with James Cook's voyages: one a seizure, one a gift.",
+  11: "Inscriptions, books and archives: the written record of states, faiths and scholars.",
+  12: "Objects made for temples, palaces and churches, removed from the places they belonged to.",
+  13: "Objects that changed hands again and again as spoils of war.",
 };
 
 const pad3 = (n) => String(n).padStart(3, '0');
+// one number per object: the collection number, written "001" (the same value as ?no= in URLs);
+// a room is "Room 5, floor 1" (numbered along the walking route, floor 1 = rooms 1-8)
+const invNo = (n) => pad3(n);
+const roomLabel = (r) => `Room ${r}, floor ${Number(r) <= 8 ? 1 : 2}`;
 
 // ---------- museum floors ----------
 // The floor plans (object page, atlas) hold one <g class="museum-floor" data-floor="n">

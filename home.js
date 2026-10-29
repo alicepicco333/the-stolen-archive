@@ -8,9 +8,8 @@
   if (!list) return;
   list.innerHTML = INVENTORY.map((o, i) => `
     <li style="--i: ${i}">
-      <a href="Object-page.html?no=${o.no}" aria-label="${pad3(o.no)} ${o.title}">
+      <a href="Object-page.html?no=${o.no}" aria-label="${o.title}, ${invNo(o.no)}" title="${o.title}">
         <figure class="duotone"><img src="${o.images[0]}" alt="" loading="eager"></figure>
-        <span class="mono">${pad3(o.no)}</span>
       </a>
     </li>`).join('');
 })();
@@ -21,7 +20,7 @@
   const band = document.querySelector('.marquee');
   if (!band) return;
   const item = (o) =>
-    `<span class="marquee__item"><span class="mono">${pad3(o.no)}</span>${o.title} · ${o.from.label.split(',')[0]} → ${o.to ? o.to.label.split(',')[0] : 'various museums'}</span>`;
+    `<span class="marquee__item"><span class="mono">${invNo(o.no)}</span>${o.title} · ${o.from.label.split(',')[0]} → ${o.to ? o.to.label.split(',')[0] : 'various museums'}</span>`;
   const html = INVENTORY.map(item).join('');
   // two identical tracks so the loop is seamless
   band.querySelectorAll('.marquee__track').forEach((track) => { track.innerHTML = html; });

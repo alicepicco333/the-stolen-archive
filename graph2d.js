@@ -235,26 +235,55 @@
     else if (d.data.label.length > chars || narrow.matches) openNote(d);
   }
 
-  // the note: the full text of a long value, pinned beside its node
+  // the note: the full text of a long value. The graph box clips its overflow, so the note
+  // is placed inside it only where it fits whole (under the node, or above it); otherwise,
+  // and always on phones, it is docked as a panel directly under the graph, outside the
+  // clipped box. The text is never cut and never scrolls inside the note.
+  let noteTrigger = null;
   function openNote(d) {
     closeNote();
-    const trigger = gNodes.selectAll('g.g2-node').filter((n) => n === d).node();
+    noteTrigger = gNodes.selectAll('g.g2-node').filter((n) => n === d).node();
     note = document.createElement('div');
     note.className = 'g2-note';
+    note.id = 'g2-note';
     note.setAttribute('role', 'dialog');
     note.setAttribute('aria-label', d.data.prop);
     note.innerHTML = `<div class="g2-note__head"><p class="mono">${esc(d.data.prop)}</p><button type="button" class="btn btn--small">Close</button></div><p class="g2-note__text">${esc(d.data.label)}</p>`;
     root.appendChild(note);
-    // under the node, kept inside the graph's width
     // svg units to box pixels (the graph may be scaled down to fit)
-    const left = Math.min((d.y + PAD.left) * view.k + 12, root.clientWidth - note.offsetWidth - 12);
-    note.style.left = `${Math.max(12, left)}px`;
-    note.style.top = `${(d.x - view.minX) * view.k + 16}px`;
-    note.querySelector('button').addEventListener('click', () => { closeNote(); trigger?.focus(); });
+    const nodeX = (d.y + PAD.left) * view.k;
+    const nodeY = (d.x - view.minX) * view.k;
+    const w = note.offsetWidth;
+    const h = note.offsetHeight;
+    const boxH = root.clientHeight;
+    const below = nodeY + 16;
+    const above = nodeY - 16 - h;
+    const top = below + h <= boxH - 8 ? below : (above >= 8 ? above : null);
+    if (narrow.matches || top === null || w > root.clientWidth - 24) {
+      // docked under the graph, in the page flow
+      note.classList.add('g2-note--docked');
+      root.after(note);
+    } else {
+      note.style.left = `${Math.max(12, Math.min(nodeX + 12, root.clientWidth - w - 12))}px`;
+      note.style.top = `${top}px`;
+    }
+    noteTrigger?.setAttribute('aria-expanded', 'true');
+    noteTrigger?.setAttribute('aria-controls', 'g2-note');
+    note.querySelector('button').addEventListener('click', () => closeNote(true));
     note.querySelector('button').focus({ preventScroll: true });
+    // keep the whole note inside the viewport
+    const r = note.getBoundingClientRect();
+    if (r.top < 0) window.scrollBy(0, r.top - 12);
+    else if (r.bottom > window.innerHeight - 12) window.scrollBy(0, Math.min(r.top - 12, r.bottom - window.innerHeight + 12));
   }
-  function closeNote() { note?.remove(); note = null; }
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && note) closeNote(); });
+  function closeNote(returnFocus) {
+    if (!note) return;
+    note.remove();
+    note = null;
+    noteTrigger?.removeAttribute('aria-expanded');
+    if (returnFocus) noteTrigger?.focus({ preventScroll: true });
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && note) { e.preventDefault(); closeNote(true); } });
   document.addEventListener('click', (e) => { if (note && !note.contains(e.target) && !e.target.closest?.('.g2-node')) closeNote(); });
 
   function openables() { return tree.descendants().filter((d) => d.depth >= 2); }

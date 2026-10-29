@@ -31,7 +31,7 @@
     img.alt = window.ObjectGallery.altFor(index);
     scale = 1; x = 0; y = 0;
     applyTransform();
-    count.textContent = `${pad(index + 1)} / ${pad(list.length)}`;
+    count.textContent = `Photo ${index + 1} of ${list.length}`;
     steps.forEach((b) => { b.hidden = list.length < 2; });
   }
 

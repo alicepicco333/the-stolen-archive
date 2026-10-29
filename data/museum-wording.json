@@ -1,0 +1,27 @@
+{
+  "note": "The museum's own wording, crossed out, with the plain version beside it. One entry per pair: the object's inventory number, the field it belongs to ('how it left', 'held today' or 'status/return'), the museum phrase and the plain correction. Shown on the collection cards and the object page record by quirks.js. Edit the wording here; no code change is needed.",
+  "pairs": [
+    {"no": 1, "field": "how it left", "museum": "acquired 1897", "plain": "seized in the British attack on Benin City, 1897"},
+    {"no": 2, "field": "held today", "museum": "acquired legally", "plain": "surrendered by the young Maharaja after the Anglo-Sikh war"},
+    {"no": 3, "field": "held today", "museum": "acquired 1860", "plain": "looted by British and French troops, 1860"},
+    {"no": 4, "field": "how it left", "museum": "found", "plain": "removed by a British railway engineer, 1861 to 1862"},
+    {"no": 5, "field": "held today", "museum": "acquired legally", "plain": "removed by Elgin's agents under a disputed Ottoman permit"},
+    {"no": 7, "field": "held today", "museum": "presented by Queen Victoria", "plain": "taken from Orongo by the crew of HMS Topaze, 1868"},
+    {"no": 10, "field": "held today", "museum": "purchased", "plain": "dug up illegally and sold abroad"},
+    {"no": 11, "field": "how it left", "museum": "collected", "plain": "taken from Persepolis by European diplomats and travelers"},
+    {"no": 12, "field": "held today", "museum": "division of finds", "plain": "removed to Berlin under disputed circumstances, 1913"},
+    {"no": 14, "field": "held today", "museum": "transferred to the V&A", "plain": "looted by British troops after Srirangapatna fell, 1799"},
+    {"no": 15, "field": "how it left", "museum": "acquired 1897", "plain": "taken from the Oba's palace in 1897"},
+    {"no": 16, "field": "held today", "museum": "acquired", "plain": "surrendered by one occupying army to another, 1801"},
+    {"no": 17, "field": "held today", "museum": "acquired by Louis XVIII", "plain": "cut from a temple ceiling with saws and gunpowder"},
+    {"no": 19, "field": "how it left", "museum": "donated 1903", "plain": "seized in Kurt von Pavel's punitive campaign, 1902"},
+    {"no": 20, "field": "how it left", "museum": "acquired", "plain": "bought from the caves' guardian for a small donation"},
+    {"no": 21, "field": "status/return", "museum": "returned", "plain": "lent back to Korea; France keeps ownership"},
+    {"no": 21, "field": "how it left", "museum": "since 1867", "plain": "taken by French troops, who burned the library, 1866"},
+    {"no": 22, "field": "how it left", "museum": "division of finds", "plain": "divided while Iraq was under British mandate, 1926"},
+    {"no": 26, "field": "how it left", "museum": "gift", "plain": "given away without legal authority, Colombia's court ruled"},
+    {"no": 29, "field": "how it left", "museum": "gift of Heinrich Schliemann", "plain": "smuggled out of the Ottoman Empire, 1873"},
+    {"no": 29, "field": "held today", "museum": "compensation", "plain": "taken from Berlin by the Red Army, 1945"},
+    {"no": 30, "field": "held today", "museum": "Swedish state property", "plain": "taken from Prague Castle by the Swedish army, 1648"}
+  ]
+}

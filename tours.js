@@ -33,9 +33,9 @@
           const rdf = decodeURIComponent((tour.texts[id].metadata?.['Rdf-file_link'] || '').split('/').pop());
           const o = inventoryEntry(parseInt(rdf, 10));
           if (!o) return '';
-          return `<li><a href="Object-page.html?no=${o.no}&tour=${encodeURIComponent(list.dataset.tourStrip)}" title="${String(i + 1).padStart(2, '0')} · ${o.title}">
+          return `<li><a href="Object-page.html?no=${o.no}&tour=${encodeURIComponent(list.dataset.tourStrip)}" title="${invNo(o.no)} ${o.title}">
             <figure class="duotone"><img src="${o.images[0]}" alt="" loading="lazy"></figure>
-            <span class="visually-hidden">Stop ${i + 1}: ${o.title}</span></a></li>`;
+            <span class="visually-hidden">${invNo(o.no)} ${o.title}</span></a></li>`;
         }).join('');
       });
     })

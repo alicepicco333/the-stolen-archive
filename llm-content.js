@@ -1,13 +1,10 @@
-// Shows the generated content from llm-data.json on the object page: translations,
+// Shows the generated content from llm-data.json on the object page: the
 // "Go deeper" panel (history, geography), alt text for every photo and then/now geodata.
 // llm-data.json is pre-generated (see the documentation, "Generated content"); it can also
 // be rebuilt with llm/enrich.mjs. If it is missing, the page just works as before.
 
 const LLM_UI = {
   en: { name: 'English', deeper: 'Go deeper', history: 'History', geography: 'Geography', then: 'Then', now: 'Now', removed: 'Removed' },
-  it: { name: 'Italiano', deeper: 'Approfondisci', history: 'Storia', geography: 'Geografia', then: 'Allora', now: 'Oggi', removed: 'Rimosso' },
-  fr: { name: 'Français', deeper: 'Aller plus loin', history: 'Histoire', geography: 'Géographie', then: 'Hier', now: 'Aujourd\'hui', removed: 'Retiré' },
-  es: { name: 'Español', deeper: 'Profundizar', history: 'Historia', geography: 'Geografía', then: 'Antes', now: 'Hoy', removed: 'Retirado' },
 };
 
 const LLMContent = {
@@ -21,12 +18,11 @@ const LLMContent = {
     } catch (error) {
       console.info('No llm-data.json, AI content disabled.', error);
     }
-    this.setupLanguageSelect();
     return this.data;
   },
 
   get lang() {
-    return localStorage.getItem('lang') || 'en';
+    return 'en'; // the site is in English only: the translations were removed
   },
 
   ui() {
@@ -39,38 +35,9 @@ const LLMContent = {
     return decodeURIComponent(link.split('/').pop() || '').replace(/\.rdf$/i, '');
   },
 
-  // Languages that actually have translations in llm-data.json.
-  availableLanguages() {
-    const langs = new Set(['en']);
-    for (const tour of Object.values((this.data && this.data.tours) || {})) {
-      for (const item of Object.values(tour)) Object.keys(item.i18n || {}).forEach((l) => langs.add(l));
-    }
-    return [...langs];
-  },
-
-  setupLanguageSelect() {
-    const select = document.getElementById('lang-select');
-    if (!select) return;
-    const langs = this.availableLanguages();
-    if (langs.length < 2) return;
-    select.innerHTML = langs.map((l) => `<option value="${l}">${(LLM_UI[l] && LLM_UI[l].name) || l}</option>`).join('');
-    select.value = langs.includes(this.lang) ? this.lang : 'en';
-    select.parentElement.hidden = false;
-    select.addEventListener('change', () => {
-      localStorage.setItem('lang', select.value);
-      document.documentElement.lang = select.value;
-      window.dispatchEvent(new Event('langchange'));
-    });
-    document.documentElement.lang = select.value;
-  },
-
-  // Translated tour texts for one item, or null to keep the English original.
-  // Keyed by object id (older files used the tour position, item1, item2...).
-  tourTranslation(tourName, itemId, itemData) {
-    if (!this.data || this.lang === 'en') return null;
-    const tour = (this.data.tours && this.data.tours[tourName]) || {};
-    const entry = (itemData && tour[this.objectId(itemData)]) || tour[itemId];
-    return (entry && entry.i18n && entry.i18n[this.lang]) || null;
+  // The translations were removed: the tour texts are always the English originals.
+  tourTranslation() {
+    return null;
   },
 
   // Alt text and long description for one photo, in the current language.

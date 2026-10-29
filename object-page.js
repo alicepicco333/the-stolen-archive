@@ -36,8 +36,8 @@ function renderRoom(entry, floor) {
   const markers = document.getElementById('floor-markers');
   if (markers) {
     markers.innerHTML = entry ? INVENTORY.filter((o) => o.floor === floor && o.no !== entry.no && o.pin).map((o) => `
-      <a href="Object-page.html?no=${o.no}" data-no="${o.no}" class="${o.room === entry.room ? 'is-same-room' : ''}" aria-label="${pad3(o.no)} ${o.title}, room ${o.room}">
-        <title>${pad3(o.no)} ${o.title}</title>
+      <a href="Object-page.html?no=${o.no}" data-no="${o.no}" class="${o.room === entry.room ? 'is-same-room' : ''}" aria-label="${invNo(o.no)} ${o.title}, ${roomLabel(o.room)}">
+        <title>${invNo(o.no)} ${o.title}</title>
         <circle class="floor-dot" cx="${o.pin[0]}" cy="${o.pin[1] + 21}" r="9"/>
       </a>`).join('') : '';
   }
@@ -52,7 +52,7 @@ function renderRoom(entry, floor) {
     <ul class="room-card__objects">${others.map((o) => `
       <li><a href="Object-page.html?no=${o.no}">
         <span class="room-card__thumb duotone"><img src="${o.images[0]}" alt="" loading="lazy"></span>
-        <span class="mono">${pad3(o.no)}</span>
+        <span class="mono">${invNo(o.no)}</span>
         <span class="room-card__title">${o.title}</span>
       </a></li>`).join('')}</ul>` : '<p class="room-card__also mono">The only object in this room</p>'}`;
   card.querySelectorAll('.room-card__objects a').forEach((a) => {
@@ -143,7 +143,7 @@ async function loadTourContent() {
             document.getElementById('item-title').textContent = objectName;
             document.getElementById('object-date').textContent = objectDate;
             const itemText = translated?.[complexity]?.[length] || itemData[complexity]?.[length] || 'No text available for this selection.';
-            document.getElementById('item-text').textContent = itemText;
+            renderText(itemText);
             document.title = `${itemData.title} · The Stolen Archive`;
 
             renderLabel(itemData, index, items.length, tourName, length, complexity);
@@ -218,8 +218,6 @@ async function loadTourContent() {
         await Promise.all([window.LLMContent?.load(), window.Perspectives?.load()]);
         displayItem(currentIndex, length, complexity);
 
-        window.addEventListener('langchange', () => displayItem(currentIndex));
-
         document.getElementById('prev').addEventListener('click', () => {
             if (currentIndex > 0) {
                 currentIndex--;
@@ -261,8 +259,8 @@ async function loadTourContent() {
                 const li = document.createElement('li');
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.textContent = pad(i + 1);
-                button.setAttribute('aria-label', `Object ${i + 1}: ${texts[itemId]?.title || ''}`);
+                button.textContent = pad(objectNo(texts[itemId]) || i + 1, 3); // the collection number
+                button.setAttribute('aria-label', `${pad(objectNo(texts[itemId]) || i + 1, 3)} ${texts[itemId]?.title || ''}`);
                 button.addEventListener('click', () => {
                     currentIndex = i;
                     localStorage.setItem('currentIndex', currentIndex);
@@ -347,7 +345,7 @@ async function renderGallery(itemData, entry) {
     viewer.hidden = false;
     main.hidden = true;
     enlarge.hidden = true;
-    count.textContent = `3D / ${pad(total)}`;
+    count.textContent = `3D view, 1 of ${total}`;
     mark(0);
     renderCredit(model, true);
     viewerReady.then(() => { if (token === renderGallery.token) window.Viewer3D.show?.(model); });
@@ -364,7 +362,7 @@ async function renderGallery(itemData, entry) {
     main.title = alt ? alt.long_description : '';
     main.dataset.altSet = alt ? '1' : '';
     main.decode?.().catch(() => {}).finally(() => main.classList.add('is-shown'));
-    count.textContent = `${pad(i + offset + 1)} / ${pad(total)}`;
+    count.textContent = `Photo ${i + offset + 1} of ${total}`;
     renderCredit(photos[i]);
     mark(i + offset);
   }
@@ -468,16 +466,39 @@ function renderLabel(itemData, index, total, tourName, length, complexity) {
   const room = (maps['caption-1'] || '').match(/Room\s*(\d+)\s*-\s*(.*)/);
 
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-  set('object-no', inventoryNo);
-  set('label-no', `No. ${inventoryNo}`);
+  // the inventory number: the object's only ID, the one number shown big
+  const noEl = document.getElementById('object-no');
+  if (noEl) noEl.textContent = inventoryNo;
   const entry = inventoryEntry(objectNo(itemData));
   set('label-from', entry ? entry.from.label : (thenNow ? thenNow[1] : '—'));
   set('label-to', thenNow ? thenNow[2] : '—');
   set('label-how', entry?.how ? entry.how.label : '—');
-  set('label-room', room ? `R${room[1]} · ${room[2]}` : (maps['caption-1'] || '—'));
-  set('object-stamp', thenNow ? `Removed from ${thenNow[1].split(' (')[0]}` : '');
-  set('tour-name', tourName);
-  set('tour-position', `${pad(index + 1)} / ${pad(total)}`);
+  // the room comes from inventory.js, the one source for room numbers (walking-route order)
+  set('label-room', entry ? `${roomLabel(entry.room)} · ${ROOMS[entry.room]}` : (room ? `${roomLabel(room[1])} · ${room[2]}` : (maps['caption-1'] || '—')));
+  // the museum's own wording, crossed out beside the field it belongs to (quirks.js)
+  document.getElementById('status-wording')?.remove();
+  if (entry && typeof Quirks !== 'undefined') {
+    Quirks.loadWording().then(() => {
+      [['label-how', 'how it left'], ['label-to', 'held today']].forEach(([id, field]) => {
+        const dd = document.getElementById(id);
+        const list = Quirks.wordingFor(entry.no, field);
+        if (dd && list.length && !dd.querySelector('.museum-wording')) dd.insertAdjacentHTML('beforeend', ` ${Quirks.wordingHTML(list)}`);
+      });
+      const status = Quirks.wordingFor(entry.no, 'status/return');
+      if (status.length && !document.getElementById('status-wording')) {
+        document.querySelector('.object-label .label-list')?.insertAdjacentHTML('beforebegin', `<p class="object-label__wording" id="status-wording">${Quirks.wordingHTML(status)}</p>`);
+      }
+    });
+  }
+  set('tour-name', tourName.replace(/ Tour$/, ' tour'));
+  // the tour position is a bar, not a number (screen readers get the stop in words)
+  const bar = document.getElementById('tour-progress');
+  if (bar) {
+    bar.setAttribute('aria-valuemax', String(total));
+    bar.setAttribute('aria-valuenow', String(index + 1));
+    bar.setAttribute('aria-valuetext', `${tourName.replace(/ Tour$/, ' tour')}, stop ${index + 1} of ${total}`);
+    bar.style.setProperty('--progress', String(total > 1 ? (index + 1) / total : 1));
+  }
 
   document.getElementById('prev').disabled = index === 0;
   document.getElementById('next').disabled = index === total - 1;
@@ -516,3 +537,38 @@ window.onload = async () => {
 
   await loadTourContent();
 };
+
+// The tour text as real paragraphs. Texts with line breaks keep them; a long text written as
+// one block is broken at sentence ends into paragraphs of about two to four sentences. The
+// words are never changed: if the split would lose any text, the text stays one paragraph.
+function textParagraphs(text) {
+  const t = String(text || '').trim();
+  let parts = t.split(/\n+/).map((s) => s.trim()).filter(Boolean);
+  if (parts.length > 1 || t.length < 520) return parts;
+  const sentences = t.match(/[^.!?]+[.!?]+["”’)]*(?:\s+|$)/g);
+  if (!sentences || sentences.join('') !== t) return [t];
+  parts = [];
+  let cur = '';
+  sentences.forEach((s) => {
+    cur += s;
+    const lastWord = cur.trim().split(/\s+/).pop() || '';
+    // break after a sentence once the paragraph has some length, never after a short
+    // abbreviation such as "St." or "c."
+    if (cur.length > 330 && lastWord.replace(/[.!?"”’)]+$/, '').length > 3) { parts.push(cur.trim()); cur = ''; }
+  });
+  if (cur.trim()) {
+    if (parts.length && cur.trim().length < 140) parts[parts.length - 1] += ` ${cur.trim()}`;
+    else parts.push(cur.trim());
+  }
+  return parts;
+}
+function renderText(text) {
+  const box = document.getElementById('item-text');
+  if (!box) return;
+  box.innerHTML = '';
+  textParagraphs(text).forEach((para) => {
+    const p = document.createElement('p');
+    p.textContent = para;
+    box.appendChild(p);
+  });
+}
